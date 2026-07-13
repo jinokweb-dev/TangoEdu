@@ -1411,3 +1411,28 @@ function drawSkeletonPerson(ctx, cx, neckY, hipY, kneeY, ankleY, kneeOff, ankleO
 
 window.handleProfVideoUpload = handleProfVideoUpload;
 window.deleteJournalEntry = deleteJournalEntry;
+
+function handleMasterVideoUpload(inputEl) {
+  if (inputEl.files.length === 0) return;
+  const file = inputEl.files[0];
+  const figureSelect = document.getElementById("figure-select");
+  const weekId = figureSelect.value;
+  
+  const btn = inputEl.nextElementSibling;
+  if (btn) {
+    btn.textContent = "⚙️ 파일 업로드 및 저장 중...";
+    btn.disabled = true;
+  }
+
+  saveCurriculumVideo(weekId, file, () => {
+    if (btn) {
+      btn.textContent = "📹 이 주차 시범 영상 등록/변경";
+      btn.disabled = false;
+    }
+    loadProfessorDemoVideo(weekId);
+    renderCurriculum();
+    alert(`${weekId}주차 지도교수 시범 영상이 성공적으로 등록되었습니다.`);
+  });
+}
+
+window.handleMasterVideoUpload = handleMasterVideoUpload;

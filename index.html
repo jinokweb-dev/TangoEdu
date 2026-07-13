@@ -70,6 +70,10 @@
                 <video id="analysis-video-master" playsinline loop muted></video>
                 <canvas id="analysis-canvas-master"></canvas>
               </div>
+              <input type="file" id="master-file-upload" accept="video/*" style="display:none;" onchange="handleMasterVideoUpload(this)">
+              <button class="btn-prof-upload" onclick="document.getElementById('master-file-upload').click()" style="margin-top: 6px; padding: 6px 8px; font-size: 0.75rem; width: 100%;">
+                📹 이 주차 시범 영상 등록/변경
+              </button>
             </div>
             
             <!-- Right: Student Practice -->
