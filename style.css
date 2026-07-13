@@ -350,21 +350,12 @@ p {
   display: block;
 }
 
-/* Professor mode upload widgets */
+/* Professor mode upload widgets (always visible for easy updates) */
 .prof-upload-btn-container {
-  display: none;
+  display: block;
   margin-top: 10px;
   padding-top: 10px;
   border-top: 1px dotted rgba(212, 175, 55, 0.3);
-}
-
-body.prof-mode-active .prof-upload-btn-container {
-  display: block;
-}
-
-body.prof-mode-active .week-item {
-  border-color: var(--crimson);
-  box-shadow: 0 0 8px rgba(155, 17, 30, 0.2);
 }
 
 .btn-prof-upload {

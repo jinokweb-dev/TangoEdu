@@ -1,6 +1,6 @@
 // Myongji University Future Education Center - Tango Master Course
 // Advising Professors: Hong Soo & Jin Joo
-// Core Logic (Mobile-First Shell + IndexedDB Video Journal Storage)
+// Core Business Logic (Beginner/Intermediate Curriculum, Accordions with Video Uploads, Side-by-Side Sync Analyzer)
 
 // ==========================================
 // 1. DATA DEFINITIONS (CURRICULUM & GLOSSARY)
@@ -11,49 +11,73 @@ const CURRICULUM_DATA = [
     week: 1,
     title: "탱고의 시작: 바른 자세와 걷기 (Caminata)",
     badge: "1주차",
-    content: "모든 아름다운 탱고의 기초인 걷기(Caminata)를 배웁니다. 곧은 척추 중심 축(Eje)을 형성하고, 남녀 간의 부드러우면서도 탄탄한 안쪽 포옹(Abrazo) 자세를 익힙니다."
+    course: "basic",
+    goal: "안정적인 수직 정렬(Eje)과 척추 축을 세운 걷기 메커니즘 체득.",
+    tip: "시니어분들은 무릎 관절 보호를 위해 착지 순간 무릎을 완전히 펴지 마시고, 발목 관절의 힘을 뺀 상태로 발끝 커넥션에 주안점을 두세요.",
+    desc: "아르헨티나 탱고의 정수이자 평생 연습하게 될 '걷기(Caminata)'를 시작합니다. 남녀 간의 서로 존중하는 가슴 포옹(Abrazo) 자세를 익히며 안정되게 나아갑니다."
   },
   {
     week: 2,
     title: "8보 기초 조합: 살리다 바시카 (Salida Básica)",
     badge: "2주차",
-    content: "탱고의 문을 여는 대표적인 8단계 기초 동선입니다. 론다(댄스홀 진행방향)를 인지하며 파트너와 흐름을 맞춰 이동하는 훈련을 합니다."
+    course: "basic",
+    goal: "1보부터 8보까지 진행하며 크로스(Cruzada) 체중이동 이해.",
+    tip: "2보 옆걸음 시 어깨너비 이상 넓게 벌리지 않도록 가슴 회전 각도를 통제하며, 리더와 팔로워의 상체 평행 프레임을 유지하는 연습에 힘쓰십시오.",
+    desc: "기본 8단계 발디딤인 살리다 바시카를 배웁니다. 론다(댄스홀 진행방향)의 질서에 발맞추어 이동하고 방향을 세팅하는 법을 실습합니다."
   },
   {
     week: 3,
     title: "방향 전환의 핵심: 오초 코르타도 (Ocho Cortado)",
     badge: "3주차",
-    content: "밀롱가 등 협소한 장소에서 필수적인 8자 잘라내기 동작입니다. 골반의 회전과 상체의 고정을 유연하게 분리(Disociación)하는 방법을 배웁니다."
+    course: "basic",
+    goal: "좁은 무도회에서 방향을 자르고 우회하기 위한 리바운드 테크닉.",
+    tip: "리더는 급하게 팔로 당기지 마시고 상체 가슴 트위스트(리바운드)를 유도하여 팔로워 골반의 피벗 감각을 자연스럽게 유도해내야 합니다.",
+    desc: "밀롱가에서 정면 진행을 할 수 없을 때 발걸음을 잘라서 옆이나 반대 방향으로 선회하는 매우 유용하고 아름다운 필수 피구라입니다."
   },
   {
     week: 4,
     title: "부드러운 피벗: 오초 아델란테 & 아뜨라스 (Ocho)",
     badge: "4주차",
-    content: "앞으로 나아가는 전진 오초(Adelante)와 뒤로 나아가는 후진 오초(Atrás)를 배웁니다. 올바른 체중 이동(Pisada)에 집중합니다."
+    course: "basic",
+    goal: "전진 오초(Adelante) 및 후진 오초(Atrás)를 통한 상하체 회전 분리.",
+    tip: "상체 프레임은 파트너와 나란히 유지하되 골반 이하 하체만 비틀어 회전하는 분리(Disociación)가 핵심입니다. 상체가 흔들리면 아브라소가 찢어집니다.",
+    desc: "바닥에 부드러운 8자 곡선을 그리는 스텝을 배웁니다. 서로의 무게 중심 축을 존중하며 부드럽게 꼬임을 풀고 피벗하는 훈련을 반복합니다."
   },
   {
     week: 5,
     title: "회전 원리 학습: 히로 (Giro) 테크닉",
     badge: "5주차",
-    content: "리더를 중심으로 팔로워가 원형 궤도를 그리며 회전하는 동작입니다. 회전 시 중심 축이 흔들리지 않도록 등(Back) 프레임을 지탱하는 양측의 커넥션을 연습합니다."
+    course: "advanced",
+    goal: "공동의 회전축을 잡고 파트너 주위를 원형으로 회전하는 테크닉.",
+    tip: "회전 궤도 내부의 리더가 가상의 등대처럼 척추 축을 고정한 상태로 지탱해야, 팔로워가 원형 궤도를 일정하게 흐를 수 있습니다.",
+    desc: "앞걸음, 옆걸음, 뒷걸음을 결합하여 파트너의 주변을 둥글게 원형 회전하는 중급 피구라입니다. 회전 시 등 근육 텐션 유지가 필수적입니다."
   },
   {
     week: 6,
     title: "리듬과 감성의 교감: 탱고 음악성 (Musicality)",
     badge: "6주차",
-    content: "아르헨티나 탱고(4/4), 밀롱가(2/4), 발스(3/4)의 음악적 특징을 파악합니다. 반도네온의 비트와 강약 세기에 맞춰 발동작의 템포를 조절하고 표현하는 훈련을 진행합니다."
+    course: "advanced",
+    goal: "반도네온 멜로디의 꼼빠스(Compás)와 강약 쪼개기 감각 체득.",
+    tip: "비트를 발바닥으로 확실하게 밟아 지면을 누르는 강박(1박과 3박) 액센트 표현력과, 멜로디 흐름에 무게를 늘리는 슬로우 보행을 분리하세요.",
+    desc: "탱고(4/4), 밀롱가(2/4), 발스(3/4) 음악의 박자 차이를 배우며 음악의 감정을 댄스 보폭과 속도로 표현하는 우아함을 연마합니다."
   },
   {
     week: 7,
     title: "세계 챔피언의 장식: 사카다와 보레오 (Sacada & Boleo)",
     badge: "7주차",
-    content: "상대방의 빈 공간에 내 다리를 집어넣는 사카다(Sacada)와 허리 회전의 원심력으로 발끝을 튕기는 보레오(Boleo)를 안전하고 기품있게 구사하는 고급 테크닉입니다."
+    course: "advanced",
+    goal: "원심력 반동을 이용한 장식 동작 보레오와 공간을 뺏는 사카다.",
+    tip: "보레오는 힘으로 다리를 직접 차올리는 것이 아닌 상체 회전(Pivot) 반동으로 채찍 끝처럼 발이 날려야 안전하며 품격이 살아납니다.",
+    desc: "상대방이 체중을 비운 딛는 발 공간에 내 발을 파고드는 사카다(Sacada)와 허리의 비틀림 원심력을 극대화한 보레오(Boleo)를 배웁니다."
   },
   {
     week: 8,
     title: "밀롱가 에티켓과 수료식 (Codigos)",
     badge: "8주차",
-    content: "파트너에 대한 정중한 신호인 눈빛 교환(Cabeceo)과 댄스홀 내 매너를 체득합니다. 8주 동안 연마한 동작들을 자유롭게 이어 추는 무대를 선보이며 과정을 수료합니다."
+    course: "advanced",
+    goal: "카베세오(Cabeceo)와 론다(Ronda) 차간 거리 유지를 통한 매너 체화.",
+    tip: "앞 커플과의 거리를 최소 1.5미터 유지하며 론다 매너를 존중하는 배려가 있을 때 비로소 챔피언 마스터 과정의 품격이 완성됩니다.",
+    desc: "수강생 여러분의 8주 마스터 클래스 수료식 무대를 선보이며, 실제 무도회인 밀롱가에서 예의를 다해 타인과 음악을 나누는 코디고를 전수받습니다."
   }
 ];
 
@@ -149,41 +173,77 @@ const GLOSSARY_DATA = [
 ];
 
 const ANALYSIS_REPORTS = {
-  caminata: {
+  1: {
     score: 91,
     axisScore: 94,
     connectionScore: 88,
     musicalityScore: 91,
-    strengths: "전체적인 수직 정렬(Eje)이 매우 모범적입니다. 딛는 매 발걸음마다 체중이 완벽히 한 발 축으로 온전히 전이되며 나아가는 안정적인 무브먼트가 돋보입니다.",
-    improvements: "후진 걷기 시, 다리가 먼저 나가기 전에 골반의 이완이 반 박자 늦어 상체가 순간적으로 꺾이는 현상이 1회 발견되었습니다. 발과 골반이 한 세트처럼 동시에 뻗어야 합니다.",
-    tip: "시니어분들은 무릎 관절의 보호와 우아함을 위해, 발을 딛는 착지 시점에 무릎 관절을 뻣뻣하게 완전히 잠그지 말고 미세하게 유연성을 비워 두시길 홍수 & 진주 교수가 권장합니다."
+    strengths: "Caminata 시 척추 수직 밸런스가 매우 탁월하며, 딛는 발의 중심축 전이가 정석에 가깝습니다.",
+    improvements: "리드 후진 시에 골반이 뒤늦게 풀려 상체가 미세하게 경직됩니다. 호흡을 내려놓으세요.",
+    tip: "시니어분들은 착지 순간 무릎 관절을 뻣뻣하게 굳히지 말고 유연한 무릎 여유각을 항시 유지해야 안전합니다."
   },
-  salida: {
+  2: {
     score: 84,
     axisScore: 82,
     connectionScore: 80,
     musicalityScore: 90,
-    strengths: "살리다 3보에서 4보 크로스(Cruzada)로 연결하는 발바닥 꼬임 구간의 음악적 싱크가 정확합니다. 박자를 여유롭게 사용하는 모습이 좋습니다.",
-    improvements: "2보 옆걸음(Lateral step)에서 보폭이 너무 넓어져 파트너와의 거리가 순간적으로 늘어나며 아브라소 오른쪽 손바닥 그립의 텐션이 팽팽해지는 불균형이 발견됩니다.",
-    tip: "홍수 교수의 팁: 살리다 2보는 넓게 딛는 걸음이 아닌 회전 유도를 위한 가벼운 정렬 단계입니다. 어깨너비 이상 벌리지 않도록 주의하여 프레임을 유지하세요."
+    strengths: "살리다 3보에서 4보 크로스(Cruzada) 교차 시 리듬 꼼빠스를 아주 차분하게 정박으로 지켜냅니다.",
+    improvements: "2보 오른쪽 옆걸음 시 리더가 상체를 과도하게 뻗어 아브라소 돔 프레임 형태가 일시적으로 일그러집니다.",
+    tip: "옆걸음은 발끝 정렬과 가슴의 연결이 1순위입니다. 보폭을 적당하게 통제하여 가슴 텐션을 확보하십시오."
   },
-  ocho_cortado: {
+  3: {
     score: 78,
     axisScore: 74,
     connectionScore: 78,
     musicalityScore: 82,
-    strengths: "잘라내는 시점의 리바운드(Rebound) 반응 속도가 아주 훌륭합니다. 비트를 쪼개는 탱고 특유의 경쾌한 밀롱가 리듬 해석력이 돋보입니다.",
-    improvements: "리바운드 회전 순간, 골반은 돌아가는데 상체가 골반을 따라 같이 회전하며 척추 중심 축이 흔들렸습니다. 이로 인해 파트너에게 전해지는 가슴 신호가 불명확해졌습니다.",
-    tip: "진주 교수의 코칭: 상체는 파트너와 평행하게 고정한 상태에서 허리 아래만 유연하게 회전하는 '상체 분리(Disociación)' 기초 훈련을 거울을 보며 매일 연습해 보세요."
+    strengths: "오초 코르타도 차단 지점의 퀵 리바운드 반작용 박자감이 뛰어납니다.",
+    improvements: "리바운드 시 몸통의 디소시아시온(상하체 분리)이 되지 않아 파트너 가슴을 직접 흔드는 오류가 있습니다.",
+    tip: "상체 가슴선은 끝까지 수평을 고수하고 엉덩이뼈 아래만 빠르게 비틀어 피벗을 돌려주어야 파트너가 편안합니다."
   },
-  giro: {
+  4: {
+    score: 82,
+    axisScore: 80,
+    connectionScore: 82,
+    musicalityScore: 85,
+    strengths: "전진 오초 시 골반의 피벗 꼬임 각도가 유연하여 발동작 회전 궤도가 아름답습니다.",
+    improvements: "후진 오초 시 무게가 발뒤꿈치 선을 넘어 과도하게 뒤로 자빠지는 불안정이 미세하게 관찰됩니다.",
+    tip: "체중은 항상 발가락 뿌리 부근(Metatarsal)에 중심을 살짝 얹는 아르헨티나 전통 마스터 축을 떠올려 보십시오."
+  },
+  5: {
     score: 86,
     axisScore: 85,
     connectionScore: 86,
     musicalityScore: 87,
     strengths: "회전 궤도 중심에서 흐트러짐 없이 버텨주는 회전축(Pivot axis) 관리가 뛰어납니다. 파트너가 외곽을 원형으로 깨끗하게 걷도록 잘 기다려 줍니다.",
-    improvements: "Giro 뒷걸음(Atrás) 시 발등을 뒤로 쭉 뻗는 과정에서 엉덩이가 미세하게 뒤로 빠져 가슴 밀착 각도가 깨집니다. 등 근육을 당겨 곧은 척추를 세워주세요.",
+    improvements: "Giro 뒷걸음(Atrás) 시 발등을 뒤로 축을 뻗는 과정에서 엉덩이가 미세하게 뒤로 빠져 가슴 밀착 각도가 깨집니다. 등 근육을 당겨 곧은 척추를 세워주세요.",
     tip: "홍수 & 진주 교수의 원포인트: 시니어 파트너와 춤을 출 때는 Giro 회전 시 급격히 잡아당기지 않고, 서로의 가슴 중심선이 만드는 정삼각형 프레임을 끝까지 존중하며 원을 그리십시오."
+  },
+  6: {
+    score: 88,
+    axisScore: 86,
+    connectionScore: 88,
+    musicalityScore: 92,
+    strengths: "반도네온 꼼빠스를 무릎 관절로 흡수하며 쪼개어 디디는 음악적 집중력이 아주 일품입니다.",
+    improvements: "싱코페이션 리듬 돌입 시 보행 속도가 순간적으로 급해져 파트너가 중심을 회복할 여유가 방해받습니다.",
+    tip: "급할수록 몸속 호흡을 아래로 밀착시켜 무게 중심의 침착함을 발바닥 그립으로 지면에 부착시키세요."
+  },
+  7: {
+    score: 81,
+    axisScore: 80,
+    connectionScore: 78,
+    musicalityScore: 84,
+    strengths: "사카다 진입 시 파트너 다리 사이 틈새를 확보하며 정확한 스페이스 리드에 성공합니다.",
+    improvements: "보레오 시 골반 반동이 부족하여 발끝을 자력으로 차올려, 파트너 무릎 근방에 충돌할 위험이 관찰됩니다.",
+    tip: "보레오는 리더의 가슴 회전에서 발생하는 원심력의 결과물이어야 합니다. 다리 힘으로 차올리면 절대 안 됩니다."
+  },
+  8: {
+    score: 95,
+    axisScore: 94,
+    connectionScore: 96,
+    musicalityScore: 95,
+    strengths: "론다 흐름의 질서 정연한 속도 조절 및 카베세오의 세련된 시선 처리가 완벽합니다.",
+    improvements: "지나친 경직 상태의 아브라소 프레임이 아쉽습니다. 긴장을 조금 덜어 파트너와의 일체감을 늘려보세요.",
+    tip: "상호 존중의 약속 노선인 론다의 차간 흐름을 지켜 뒤따르는 커플을 배려하는 것이 탱고의 예절입니다."
   }
 };
 
@@ -193,6 +253,7 @@ const ANALYSIS_REPORTS = {
 let activeTab = "curriculum";
 let activeGlossaryCategory = "all";
 let searchKeyword = "";
+let activeCourse = "basic"; // basic(초급 시작반) or advanced(중급 완성반)
 
 // Metronome state
 let metroBpm = 60;
@@ -202,20 +263,21 @@ let metroIntervalId = null;
 let metroCurrentBeat = 0;
 let audioCtx = null;
 
-// AI Analysis Simulation state
+// AI Side-by-Side Analysis state
 let isScanning = false;
 let scanProgress = 0;
 let scanIntervalId = null;
 let currentUploadedVideo = null;
-let selectedFigureForAnalysis = "caminata";
+let selectedFigureForAnalysis = "1";
 let canvasAnimationId = null;
 
 // ==========================================
-// 3. INDEXEDDB SETUP FOR PERSISTENT JOURNAL VIDEOS
+// 3. INDEXEDDB SETUP FOR MULTIPLE STORES
 // ==========================================
 const DB_NAME = "TangoMasterDB";
-const DB_VERSION = 1;
-const STORE_NAME = "video_journals";
+const DB_VERSION = 2; 
+const STORE_JOURNALS = "video_journals";
+const STORE_CURRICULUM = "curriculum_videos";
 let db = null;
 
 function initIndexedDB(callback) {
@@ -223,15 +285,19 @@ function initIndexedDB(callback) {
 
   request.onupgradeneeded = (event) => {
     const database = event.target.result;
-    if (!database.objectStoreNames.contains(STORE_NAME)) {
-      // Create store with id as primary key
-      database.createObjectStore(STORE_NAME, { keyPath: "id" });
+    
+    if (!database.objectStoreNames.contains(STORE_JOURNALS)) {
+      database.createObjectStore(STORE_JOURNALS, { keyPath: "id" });
+    }
+    
+    if (!database.objectStoreNames.contains(STORE_CURRICULUM)) {
+      database.createObjectStore(STORE_CURRICULUM, { keyPath: "weekId" });
     }
   };
 
   request.onsuccess = (event) => {
     db = event.target.result;
-    console.log("IndexedDB initialized successfully.");
+    console.log("IndexedDB stores successfully linked.");
     if (callback) callback();
   };
 
@@ -241,186 +307,199 @@ function initIndexedDB(callback) {
   };
 }
 
-// Save journal to database
-function saveJournalToDB(entry, callback) {
+// ==========================================
+// 4. PERSISTENT CURRICULUM VIDEO CONTROLS
+// ==========================================
+
+// Save professor's demo video
+function saveCurriculumVideo(weekId, fileBlob, callback) {
   if (!db) {
-    console.warn("Database not ready. Falling back to local variable.");
-    if (callback) callback();
+    alert("데이터베이스 준비가 되지 않았습니다.");
     return;
   }
 
-  const transaction = db.transaction([STORE_NAME], "readwrite");
-  const store = transaction.objectStore(STORE_NAME);
-  const request = store.put(entry);
-
-  request.onsuccess = () => {
-    console.log("Journal entry saved to IndexedDB.");
-    if (callback) callback();
+  const transaction = db.transaction([STORE_CURRICULUM], "readwrite");
+  const store = transaction.objectStore(STORE_CURRICULUM);
+  const entry = {
+    weekId: weekId.toString(),
+    videoBlob: fileBlob,
+    timestamp: Date.now()
   };
-
-  request.onerror = (event) => {
-    console.error("Failed to save journal to database:", event.target.error);
+  
+  const request = store.put(entry);
+  request.onsuccess = () => {
+    console.log(`Curriculum video saved for week ${weekId}`);
+    if (callback) callback();
   };
 }
 
-// Fetch all journals from database
-function fetchJournalsFromDB(callback) {
+// Retrieve professor's demo video
+function fetchCurriculumVideo(weekId, callback) {
   if (!db) {
-    if (callback) callback([]);
+    if (callback) callback(null);
     return;
   }
 
-  const transaction = db.transaction([STORE_NAME], "readonly");
-  const store = transaction.objectStore(STORE_NAME);
-  const request = store.getAll();
+  const transaction = db.transaction([STORE_CURRICULUM], "readonly");
+  const store = transaction.objectStore(STORE_CURRICULUM);
+  const request = store.get(weekId.toString());
 
   request.onsuccess = (event) => {
-    // Sort by date/timestamp descending
-    const results = event.target.result || [];
-    results.sort((a, b) => b.timestamp - a.timestamp);
-    if (callback) callback(results);
-  };
-
-  request.onerror = (event) => {
-    console.error("Failed to fetch journals:", event.target.error);
-    if (callback) callback([]);
-  };
-}
-
-// Delete journal entry from database
-function deleteJournalFromDB(id, callback) {
-  if (!db) {
-    if (callback) callback();
-    return;
-  }
-
-  const transaction = db.transaction([STORE_NAME], "readwrite");
-  const store = transaction.objectStore(STORE_NAME);
-  const request = store.delete(id);
-
-  request.onsuccess = () => {
-    console.log(`Deleted journal entry ${id} from database.`);
-    if (callback) callback();
-  };
-
-  request.onerror = (event) => {
-    console.error("Failed to delete journal:", event.target.error);
-  };
-}
-
-// ==========================================
-// 4. AUDIO SYNTHESIS FOR METRONOME
-// ==========================================
-function playMetronomeClick(isStrong) {
-  try {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (event.target.result) {
+      callback(event.target.result.videoBlob);
+    } else {
+      callback(null);
     }
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
+  };
 
-    const osc = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    
-    osc.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    const frequency = isStrong ? 950 : 550;
-    osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-    
-    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
-
-    osc.start(audioCtx.currentTime);
-    osc.stop(audioCtx.currentTime + 0.08);
-  } catch (e) {
-    console.warn("AudioContext metronome synthesis failed.", e);
-  }
+  request.onerror = () => {
+    callback(null);
+  };
 }
 
 // ==========================================
-// 5. APPLICATION INITIALIZATION & CORE LOGIC
+// 5. ACCORDION CURRICULUM RENDER & CONTROLS
 // ==========================================
 
-document.addEventListener("DOMContentLoaded", () => {
-  initIndexedDB(() => {
-    renderJournalEntries();
-  });
-  initMobileTabs();
-  initCurriculumControls();
-  renderCurriculum();
-  renderGlossary();
-  initGlossaryFilters();
-  initMetronome();
-  initAIAnalysis();
-  initJournalForm();
-});
+function renderCurriculum() {
+  const container = document.getElementById("curriculum-container");
+  if (!container) return;
 
+  const filteredWeeks = CURRICULUM_DATA.filter(w => w.course === activeCourse);
 
+  container.innerHTML = ""; // clear
 
-// Mobile Bottom Navigation Tabs Handler
-function initMobileTabs() {
-  const tabs = document.querySelectorAll(".nav-tab");
-  const contentArea = document.querySelector(".content-area");
+  filteredWeeks.forEach(w => {
+    const item = document.createElement("div");
+    item.className = "week-item";
+    item.dataset.week = w.week;
 
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      const target = tab.dataset.tab;
+    // Header structure
+    const header = document.createElement("div");
+    header.className = "week-header";
+    header.innerHTML = `
+      <span class="week-title">${w.week}주차. ${w.title}</span>
+      <span class="week-badge">${w.badge}</span>
+    `;
+    item.appendChild(header);
+
+    // Short summary text
+    const summary = document.createElement("div");
+    summary.className = "week-content";
+    summary.style.marginTop = "4px";
+    summary.textContent = w.desc;
+    item.appendChild(summary);
+
+    // Expanded details container (always upload/viewable by everyone now)
+    const details = document.createElement("div");
+    details.className = "week-details";
+    details.innerHTML = `
+      <div class="week-detail-header">🎯 수업 목표</div>
+      <div class="week-detail-desc">${w.goal}</div>
+      <div class="week-detail-header">💡 교수진 핵심 꿀팁</div>
+      <div class="week-detail-desc" style="color: var(--gold-hover); font-style: italic; border-left: 2px solid var(--gold); padding-left: 6px;">"${w.tip}"</div>
+      <div class="week-detail-header">📹 지도교수 시범 영상</div>
       
-      // Update active menu tab
-      tabs.forEach(t => t.classList.remove("active"));
-      tab.classList.add("active");
+      <!-- Video node container -->
+      <div class="curriculum-video-slot" id="video-slot-w${w.week}">
+        <p style="font-size:0.8rem; color: var(--text-secondary); text-align:center; padding: 15px 0;">영상을 불러오고 있습니다...</p>
+      </div>
+      
+      <!-- Upload controls (unconditionally visible for professors/students to manage) -->
+      <div class="prof-upload-btn-container" onclick="event.stopPropagation();">
+        <input type="file" id="prof-file-w${w.week}" accept="video/*" style="display:none;" onchange="handleProfVideoUpload(${w.week}, this)">
+        <button class="btn-prof-upload" onclick="document.getElementById('prof-file-w${w.week}').click()">📹 ${w.week}주차 시범 영상 변경/등록</button>
+      </div>
+    `;
+    item.appendChild(details);
 
-      // Update section contents
-      document.querySelectorAll(".tab-content").forEach(section => {
-        section.classList.remove("active");
+    // Click handler to toggle accordion
+    item.addEventListener("click", () => {
+      const isExpanded = item.classList.contains("expanded");
+      
+      document.querySelectorAll(".week-item").forEach(el => {
+        el.classList.remove("expanded");
+        const v = el.querySelector("video");
+        if (v) v.pause();
       });
-      document.getElementById(target).classList.add("active");
-      
-      activeTab = target;
 
-      // Reset scroll position of inner area to top for seamless mobile feel
-      if (contentArea) {
-        contentArea.scrollTop = 0;
+      if (!isExpanded) {
+        item.classList.add("expanded");
+        loadCurriculumVideoPlayer(w.week);
       }
+    });
 
-      // Stop metronome or videos when leaving tabs to respect resource constraints
-      if (target !== 'rhythm' && metroPlaying) {
-        toggleMetronome();
-      }
-      if (target !== 'analysis') {
-        const vid = document.getElementById('analysis-video');
-        if (vid && !vid.paused) vid.pause();
-        if (canvasAnimationId) {
-          cancelAnimationFrame(canvasAnimationId);
-          canvasAnimationId = null;
-        }
-      }
+    container.appendChild(item);
+  });
+}
+
+function loadCurriculumVideoPlayer(weekId) {
+  const slot = document.getElementById(`video-slot-w${weekId}`);
+  if (!slot) return;
+
+  fetchCurriculumVideo(weekId, (videoBlob) => {
+    slot.innerHTML = ""; // clear loading text
+
+    const videoEl = document.createElement("video");
+    videoEl.className = "week-demo-player";
+    videoEl.controls = true;
+    videoEl.playsInline = true;
+
+    if (videoBlob) {
+      videoEl.src = URL.createObjectURL(videoBlob);
+    } else {
+      videoEl.poster = "tango_banner.jpg";
+      slot.innerHTML = `
+        <div class="video-placeholder" style="border: 1px dashed rgba(255,255,255,0.15); padding: 30px 10px; border-radius: 8px; text-align:center; background: rgba(0,0,0,0.4); margin-bottom:10px;">
+          <p style="color: var(--gold); font-size: 0.9rem; font-weight:bold; margin-bottom:5px;">📹 등록된 시범 영상이 없습니다</p>
+          <p style="color: var(--text-secondary); font-size: 0.8rem;">아래 버튼을 클릭하여 시범 동작 영상을 등록해 주세요.</p>
+        </div>
+      `;
+      return;
+    }
+    
+    slot.appendChild(videoEl);
+  });
+}
+
+function handleProfVideoUpload(weekId, inputEl) {
+  if (inputEl.files.length === 0) return;
+  
+  const file = inputEl.files[0];
+  const btn = inputEl.nextElementSibling;
+  
+  if (btn) {
+    btn.textContent = "⚙️ 파일 업로드 및 저장 중...";
+    btn.disabled = true;
+  }
+
+  saveCurriculumVideo(weekId, file, () => {
+    if (btn) {
+      btn.textContent = `📹 ${weekId}주차 시범 영상 변경/등록`;
+      btn.disabled = false;
+    }
+    loadCurriculumVideoPlayer(weekId);
+    alert(`${weekId}주차 지도교수 시범 영상이 정상적으로 등록 완료되었습니다.`);
+  });
+}
+
+window.handleProfVideoUpload = handleProfVideoUpload;
+
+function initCurriculumControls() {
+  const filterBtns = document.querySelectorAll(".course-filter-btn");
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      filterBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeCourse = btn.dataset.course;
+      renderCurriculum();
     });
   });
 }
 
 // ==========================================
-// 6. MODULE: CURRICULUM
-// ==========================================
-function renderCurriculum() {
-  const container = document.getElementById("curriculum-container");
-  if (!container) return;
-
-  container.innerHTML = CURRICULUM_DATA.map(c => `
-    <div class="week-item">
-      <div class="week-header">
-        <span class="week-title">${c.title}</span>
-        <span class="week-badge">${c.badge}</span>
-      </div>
-      <div class="week-content">${c.content}</div>
-    </div>
-  `).join("");
-}
-
-// ==========================================
-// 7. MODULE: GLOSSARY (SEARCH & FILTER)
+// 6. MODULE: GLOSSARY (SEARCH & FILTER)
 // ==========================================
 function renderGlossary() {
   const container = document.getElementById("glossary-container");
@@ -428,18 +507,16 @@ function renderGlossary() {
 
   const filtered = GLOSSARY_DATA.filter(item => {
     const matchesCategory = (activeGlossaryCategory === "all" || item.category === activeGlossaryCategory);
-    
     const normalizedKo = item.ko.toLowerCase();
     const normalizedEs = item.es.toLowerCase();
     const matchesSearch = !searchKeyword || 
                          normalizedKo.includes(searchKeyword) || 
                          normalizedEs.includes(searchKeyword);
-                         
     return matchesCategory && matchesSearch;
   });
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="card" style="text-align: center; color: var(--text-secondary);">검색 결과가 없습니다. 다른 단어로 검색해 보세요.</div>`;
+    container.innerHTML = `<div class="card" style="text-align: center; color: var(--text-secondary);">검색 결과가 없습니다.</div>`;
     return;
   }
 
@@ -491,7 +568,7 @@ function initGlossaryFilters() {
 }
 
 // ==========================================
-// 8. MODULE: RHYTHM METRONOME
+// 7. MODULE: RHYTHM METRONOME
 // ==========================================
 function initMetronome() {
   const tempoSlider = document.getElementById("tempo-range");
@@ -589,7 +666,7 @@ function toggleMetronome() {
 function startMetroTimer() {
   let speedMultiplier = 1;
   if (metroRhythm === "milonga") {
-    speedMultiplier = 2; // Milonga is faster syncopated beat feel
+    speedMultiplier = 2;
   }
   const intervalMs = (60 / (metroBpm * speedMultiplier)) * 1000;
   metroIntervalId = setInterval(tickMetronome, intervalMs);
@@ -634,19 +711,29 @@ function resetMetronomeUI() {
 }
 
 // ==========================================
-// 9. MODULE: AI VIDEO ANALYSIS
+// 8. MODULE: AI SIDE-BY-SIDE VIDEO ANALYSIS
 // ==========================================
 function initAIAnalysis() {
   const videoInput = document.getElementById("video-input");
   const uploadZone = document.getElementById("upload-zone");
-  const videoWrapper = document.getElementById("video-wrapper");
+  const dualVideoContainer = document.getElementById("dual-video-container");
+  const syncCtrls = document.getElementById("sync-controls");
   const ctrlPanel = document.getElementById("analysis-ctrls");
+  const figureSelect = document.getElementById("figure-select");
+
   const btnStart = document.getElementById("btn-start-analysis");
   const btnReset = document.getElementById("btn-reset-analysis");
-  const scanBar = document.getElementById("scan-bar");
+  const btnSyncPlay = document.getElementById("btn-sync-play");
+  const btnSyncPause = document.getElementById("btn-sync-pause");
+  const btnSyncReset = document.getElementById("btn-sync-reset");
+  
+  const scanBarMaster = document.getElementById("scan-bar-master");
+  const scanBarStudent = document.getElementById("scan-bar-student");
   const scanStatus = document.getElementById("scan-status");
   const reportPanel = document.getElementById("report-panel");
-  const analysisVideo = document.getElementById("analysis-video");
+
+  const videoMaster = document.getElementById("analysis-video-master");
+  const videoStudent = document.getElementById("analysis-video-student");
 
   if (!videoInput || !uploadZone) return;
 
@@ -664,46 +751,80 @@ function initAIAnalysis() {
     uploadZone.style.borderColor = "var(--gold)";
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-      loadAnalysisVideo(files[0]);
+      loadStudentVideo(files[0]);
     }
   });
 
   videoInput.addEventListener("change", (e) => {
     const files = e.target.files;
     if (files.length > 0) {
-      loadAnalysisVideo(files[0]);
+      loadStudentVideo(files[0]);
     }
+  });
+
+  figureSelect.addEventListener("change", (e) => {
+    selectedFigureForAnalysis = e.target.value;
+    loadProfessorDemoVideo(selectedFigureForAnalysis);
   });
 
   btnStart.addEventListener("click", () => {
     if (isScanning) return;
     
-    selectedFigureForAnalysis = document.getElementById("figure-select").value;
+    selectedFigureForAnalysis = figureSelect.value;
     
     reportPanel.classList.remove("active");
     scanStatus.classList.add("active");
-    scanBar.classList.add("active");
+    scanBarMaster.classList.add("active");
+    scanBarStudent.classList.add("active");
     isScanning = true;
     scanProgress = 0;
 
-    analysisVideo.currentTime = 0;
-    analysisVideo.play().catch(() => {});
+    videoMaster.currentTime = 0;
+    videoStudent.currentTime = 0;
+    
+    videoMaster.play().catch(() => {});
+    videoStudent.play().catch(() => {});
 
-    startCanvasLoop();
+    startDualCanvasLoops();
 
     scanIntervalId = setInterval(() => {
       scanProgress += 2;
-      scanStatus.textContent = `🤖 영상 데이터를 정밀 스캔하는 중... (${scanProgress}%)`;
+      scanStatus.textContent = `🤖 동작 스켈레톤 추출 및 대칭도 비교 분석 중... (${scanProgress}%)`;
       
       if (scanProgress >= 100) {
         clearInterval(scanIntervalId);
         scanIntervalId = null;
         isScanning = false;
         scanStatus.classList.remove("active");
-        scanBar.classList.remove("active");
+        scanBarMaster.classList.remove("active");
+        scanBarStudent.classList.remove("active");
+        
         showAnalysisReport(selectedFigureForAnalysis);
       }
     }, 80);
+  });
+
+  btnSyncPlay.addEventListener("click", () => {
+    videoMaster.play().catch(() => {});
+    videoStudent.play().catch(() => {});
+    btnSyncPlay.textContent = "▶️ 재생 중...";
+    btnSyncPlay.style.background = "#27ae60";
+  });
+
+  btnSyncPause.addEventListener("click", () => {
+    videoMaster.pause();
+    videoStudent.pause();
+    btnSyncPlay.textContent = "▶️ 동시 재생";
+    btnSyncPlay.style.background = "#2ecc71";
+  });
+
+  btnSyncReset.addEventListener("click", () => {
+    videoMaster.currentTime = 0;
+    videoStudent.currentTime = 0;
+    videoMaster.pause();
+    videoStudent.pause();
+    btnSyncPlay.textContent = "▶️ 동시 재생";
+    btnSyncPlay.style.background = "#2ecc71";
   });
 
   btnReset.addEventListener("click", () => {
@@ -711,96 +832,94 @@ function initAIAnalysis() {
   });
 }
 
-function loadAnalysisVideo(file) {
+function loadStudentVideo(file) {
   const uploadZone = document.getElementById("upload-zone");
-  const videoWrapper = document.getElementById("video-wrapper");
+  const dualVideoContainer = document.getElementById("dual-video-container");
+  const syncCtrls = document.getElementById("sync-controls");
   const ctrlPanel = document.getElementById("analysis-ctrls");
-  const analysisVideo = document.getElementById("analysis-video");
+  const videoStudent = document.getElementById("analysis-video-student");
 
   currentUploadedVideo = file;
+  
   const fileURL = URL.createObjectURL(file);
-  analysisVideo.src = fileURL;
-  analysisVideo.load();
+  videoStudent.src = fileURL;
+  videoStudent.load();
+
+  loadProfessorDemoVideo(selectedFigureForAnalysis);
 
   uploadZone.style.display = "none";
-  videoWrapper.classList.add("active");
+  dualVideoContainer.style.display = "flex";
+  syncCtrls.style.display = "flex";
   ctrlPanel.style.display = "flex";
 }
 
-function startCanvasLoop() {
-  const canvas = document.getElementById("analysis-canvas");
-  const video = document.getElementById("analysis-video");
-  if (!canvas || !video) return;
+function loadProfessorDemoVideo(weekId) {
+  const videoMaster = document.getElementById("analysis-video-master");
+  if (!videoMaster) return;
 
-  const ctx = canvas.getContext("2d");
-  
-  function updateCanvasFrame() {
-    if (!video.paused && !video.ended) {
-      const rect = video.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-      drawSimulatedSkeleton(ctx, canvas.width, canvas.height, video.currentTime, selectedFigureForAnalysis);
+  fetchCurriculumVideo(weekId, (videoBlob) => {
+    if (videoBlob) {
+      videoMaster.src = URL.createObjectURL(videoBlob);
+    } else {
+      videoMaster.src = "";
+      videoMaster.poster = "tango_banner.jpg";
     }
-    canvasAnimationId = requestAnimationFrame(updateCanvasFrame);
+    videoMaster.load();
+  });
+}
+
+function startDualCanvasLoops() {
+  const canvasMaster = document.getElementById("analysis-canvas-master");
+  const canvasStudent = document.getElementById("analysis-canvas-student");
+  
+  const videoMaster = document.getElementById("analysis-video-master");
+  const videoStudent = document.getElementById("analysis-video-student");
+
+  if (!canvasMaster || !canvasStudent || !videoMaster || !videoStudent) return;
+
+  const ctxMaster = canvasMaster.getContext("2d");
+  const ctxStudent = canvasStudent.getContext("2d");
+  
+  function updateCanvasFrames() {
+    if (!videoMaster.paused || videoMaster.currentTime > 0) {
+      const rect = videoMaster.getBoundingClientRect();
+      canvasMaster.width = rect.width;
+      canvasMaster.height = rect.height;
+      drawSimulatedSkeleton(ctxMaster, canvasMaster.width, canvasMaster.height, videoMaster.currentTime || Date.now()/1000, 'caminata');
+    }
+
+    if (!videoStudent.paused || videoStudent.currentTime > 0) {
+      const rect = videoStudent.getBoundingClientRect();
+      canvasStudent.width = rect.width;
+      canvasStudent.height = rect.height;
+      drawSimulatedSkeleton(ctxStudent, canvasStudent.width, canvasStudent.height, videoStudent.currentTime, 'caminata');
+    }
+
+    canvasAnimationId = requestAnimationFrame(updateCanvasFrames);
   }
 
   if (canvasAnimationId) {
     cancelAnimationFrame(canvasAnimationId);
   }
-  canvasAnimationId = requestAnimationFrame(updateCanvasFrame);
-}
-
-function showAnalysisReport(figure) {
-  const report = ANALYSIS_REPORTS[figure] || ANALYSIS_REPORTS.caminata;
-  const reportPanel = document.getElementById("report-panel");
-  
-  document.getElementById("report-score").textContent = `종합 ${report.score}점`;
-  
-  document.getElementById("metric-axis-text").textContent = getRatingString(report.axisScore);
-  const axisFill = document.getElementById("metric-axis-fill");
-  axisFill.className = `metric-fill ${getScoreClass(report.axisScore)}`;
-  axisFill.style.width = `${report.axisScore}%`;
-
-  document.getElementById("metric-connection-text").textContent = getRatingString(report.connectionScore);
-  const connFill = document.getElementById("metric-connection-fill");
-  connFill.className = `metric-fill ${getScoreClass(report.connectionScore)}`;
-  connFill.style.width = `${report.connectionScore}%`;
-
-  document.getElementById("metric-musicality-text").textContent = getRatingString(report.musicalityScore);
-  const musFill = document.getElementById("metric-musicality-fill");
-  musFill.className = `metric-fill ${getScoreClass(report.musicalityScore)}`;
-  musFill.style.width = `${report.musicalityScore}%`;
-
-  document.getElementById("feedback-strengths").textContent = report.strengths;
-  document.getElementById("feedback-improvements").textContent = report.improvements;
-  document.getElementById("feedback-professor-tip").innerHTML = `"<strong>홍수 & 진주 교수의 원포인트 레슨:</strong> ${report.tip}"`;
-
-  reportPanel.classList.add("active");
-  reportPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function getRatingString(score) {
-  if (score >= 90) return `매우 우수 (${score}점)`;
-  if (score >= 80) return `우수 (${score}점)`;
-  if (score >= 70) return `보완 필요 (${score}점)`;
-  return `재훈련 요망 (${score}점)`;
-}
-
-function getScoreClass(score) {
-  if (score >= 85) return 'good';
-  if (score >= 70) return 'warning';
-  return '';
+  canvasAnimationId = requestAnimationFrame(updateCanvasFrames);
 }
 
 function resetAnalysisStudio() {
   const uploadZone = document.getElementById("upload-zone");
-  const videoWrapper = document.getElementById("video-wrapper");
+  const dualVideoContainer = document.getElementById("dual-video-container");
+  const syncCtrls = document.getElementById("sync-controls");
   const ctrlPanel = document.getElementById("analysis-ctrls");
   const reportPanel = document.getElementById("report-panel");
   const scanStatus = document.getElementById("scan-status");
-  const scanBar = document.getElementById("scan-bar");
-  const analysisVideo = document.getElementById("analysis-video");
-  const canvas = document.getElementById("analysis-canvas");
+  
+  const scanBarMaster = document.getElementById("scan-bar-master");
+  const scanBarStudent = document.getElementById("scan-bar-student");
+
+  const videoMaster = document.getElementById("analysis-video-master");
+  const videoStudent = document.getElementById("analysis-video-student");
+  
+  const canvasMaster = document.getElementById("analysis-canvas-master");
+  const canvasStudent = document.getElementById("analysis-canvas-student");
 
   if (scanIntervalId) {
     clearInterval(scanIntervalId);
@@ -812,25 +931,30 @@ function resetAnalysisStudio() {
   }
   isScanning = false;
 
-  analysisVideo.pause();
-  analysisVideo.src = "";
+  videoMaster.pause();
+  videoStudent.pause();
+  videoMaster.src = "";
+  videoStudent.src = "";
   currentUploadedVideo = null;
 
-  if (canvas) {
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
+  if (canvasMaster) canvasMaster.getContext("2d").clearRect(0,0,canvasMaster.width,canvasMaster.height);
+  if (canvasStudent) canvasStudent.getContext("2d").clearRect(0,0,canvasStudent.width,canvasStudent.height);
+
+  document.getElementById("btn-sync-play").textContent = "▶️ 동시 재생";
+  document.getElementById("btn-sync-play").style.background = "#2ecc71";
 
   uploadZone.style.display = "block";
-  videoWrapper.classList.remove("active");
+  dualVideoContainer.style.display = "none";
+  syncCtrls.style.display = "none";
   ctrlPanel.style.display = "none";
   reportPanel.classList.remove("active");
   scanStatus.classList.remove("active");
-  scanBar.classList.remove("active");
+  scanBarMaster.classList.remove("active");
+  scanBarStudent.classList.remove("active");
 }
 
 // ==========================================
-// 10. MODULE: PERSISTENT PRACTICE JOURNAL
+// 9. MODULE: PERSISTENT PRACTICE JOURNAL
 // ==========================================
 function initJournalForm() {
   const form = document.getElementById("journal-form");
@@ -839,20 +963,17 @@ function initJournalForm() {
   const fileTrigger = document.getElementById("btn-journal-file-trigger");
   const fileNameDisplay = document.getElementById("journal-file-name");
 
-  // Default date to today
   if (dateInput) {
     const today = new Date().toISOString().split("T")[0];
     dateInput.value = today;
   }
 
-  // Trigger file click when custom visual button is clicked (Senior friendly)
   if (fileTrigger && fileInput) {
     fileTrigger.addEventListener("click", () => {
       fileInput.click();
     });
   }
 
-  // Display selected file name
   if (fileInput && fileNameDisplay) {
     fileInput.addEventListener("change", (e) => {
       if (e.target.files.length > 0) {
@@ -892,16 +1013,14 @@ function saveJournalEntry() {
     title: titleVal,
     notes: notesVal,
     timestamp: Date.now(),
-    videoBlob: null // default
+    videoBlob: null
   };
 
-  // Check if a video file was uploaded
   if (fileInput && fileInput.files.length > 0) {
     newEntry.videoBlob = fileInput.files[0];
   }
 
   saveJournalToDB(newEntry, () => {
-    // Reset form
     document.getElementById("journal-title").value = "";
     document.getElementById("journal-notes").value = "";
     if (fileInput) fileInput.value = "";
@@ -914,9 +1033,23 @@ function saveJournalEntry() {
       btnSave.disabled = false;
     }
 
-    // Refresh UI list
     renderJournalEntries();
   });
+}
+
+function saveJournalToDB(entry, callback) {
+  if (!db) {
+    if (callback) callback();
+    return;
+  }
+
+  const transaction = db.transaction([STORE_JOURNALS], "readwrite");
+  const store = transaction.objectStore(STORE_JOURNALS);
+  const request = store.put(entry);
+
+  request.onsuccess = () => {
+    if (callback) callback();
+  };
 }
 
 function deleteJournalEntry(id) {
@@ -925,6 +1058,38 @@ function deleteJournalEntry(id) {
       renderJournalEntries();
     });
   }
+}
+
+function deleteJournalFromDB(id, callback) {
+  if (!db) {
+    if (callback) callback();
+    return;
+  }
+
+  const transaction = db.transaction([STORE_JOURNALS], "readwrite");
+  const store = transaction.objectStore(STORE_JOURNALS);
+  const request = store.delete(id);
+
+  request.onsuccess = () => {
+    if (callback) callback();
+  };
+}
+
+function fetchJournalsFromDB(callback) {
+  if (!db) {
+    if (callback) callback([]);
+    return;
+  }
+
+  const transaction = db.transaction([STORE_JOURNALS], "readonly");
+  const store = transaction.objectStore(STORE_JOURNALS);
+  const request = store.getAll();
+
+  request.onsuccess = (event) => {
+    const results = event.target.result || [];
+    results.sort((a, b) => b.timestamp - a.timestamp);
+    if (callback) callback(results);
+  };
 }
 
 function renderJournalEntries() {
@@ -937,13 +1102,12 @@ function renderJournalEntries() {
       return;
     }
 
-    container.innerHTML = ""; // clear
+    container.innerHTML = "";
 
     entries.forEach(e => {
       const card = document.createElement("div");
       card.className = "journal-item";
 
-      // Meta row
       const metaRow = document.createElement("div");
       metaRow.className = "journal-meta";
       metaRow.innerHTML = `
@@ -952,7 +1116,6 @@ function renderJournalEntries() {
       `;
       card.appendChild(metaRow);
 
-      // Body texts
       const bodyDiv = document.createElement("div");
       bodyDiv.className = "journal-text";
       bodyDiv.innerHTML = `
@@ -961,13 +1124,11 @@ function renderJournalEntries() {
       `;
       card.appendChild(bodyDiv);
 
-      // Video playing element (Cumulative and persistent blob url)
       if (e.videoBlob) {
         const videoElement = document.createElement("video");
         videoElement.className = "journal-video-player";
         videoElement.controls = true;
         
-        // Generate blob local URL dynamically
         const videoURL = URL.createObjectURL(e.videoBlob);
         videoElement.src = videoURL;
 
@@ -979,5 +1140,144 @@ function renderJournalEntries() {
   });
 }
 
-// Make globally accessible for template event handler
+// ==========================================
+// 10. HELPER: SKELETON DRAWER (VIDEO OVERLAY CANVAS)
+// ==========================================
+function drawSimulatedSkeleton(ctx, width, height, time, figure) {
+  ctx.clearRect(0, 0, width, height);
+
+  const centerX = width / 2;
+  const centerY = height / 2;
+
+  const swayX = Math.sin(time * 1.5) * 8;
+  const swayY = Math.cos(time * 0.8) * 4;
+
+  const lCenterX = centerX - 60 + swayX;
+  const fCenterX = centerX + 60 + swayX;
+  
+  const neckY = centerY - 50 + swayY;
+  const hipY = centerY + 20 + swayY;
+  const kneeY = centerY + 70 + swayY;
+  const ankleY = centerY + 120 + swayY;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(centerX + swayX, neckY + 25, 60, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(214, 175, 55, 0.04)";
+  ctx.strokeStyle = "rgba(214, 175, 55, 0.15)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fill();
+  ctx.restore();
+
+  let lKneeOffsetX = 0;
+  let lAnkleOffsetX = 0;
+  let fKneeOffsetX = 0;
+  let fAnkleOffsetX = 0;
+
+  if (figure === 'caminata') {
+    const walkSwing = Math.sin(time * 3);
+    lKneeOffsetX = walkSwing * 10;
+    lAnkleOffsetX = walkSwing * 20;
+    fKneeOffsetX = -walkSwing * 10;
+    fAnkleOffsetX = -walkSwing * 20;
+  }
+
+  drawSkeletonPerson(ctx, lCenterX, neckY, hipY, kneeY, ankleY, lKneeOffsetX, lAnkleOffsetX, "#E74C3C", true);
+  drawSkeletonPerson(ctx, fCenterX, neckY, hipY, kneeY, ankleY, fKneeOffsetX, fAnkleOffsetX, "#3498DB", false);
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.setLineDash([5, 3]);
+  ctx.moveTo(centerX + swayX, centerY - 80);
+  ctx.lineTo(centerX + swayX, centerY + 150);
+  ctx.strokeStyle = "#D4AF37";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.arc(centerX + swayX, centerY + 20, 6, 0, Math.PI * 2);
+  ctx.fillStyle = "#D4AF37";
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawSkeletonPerson(ctx, cx, neckY, hipY, kneeY, ankleY, kneeOff, ankleOff, color, isLeader) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  ctx.beginPath();
+  ctx.arc(cx, neckY - 20, 9, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(cx, neckY);
+  ctx.lineTo(cx, hipY);
+  ctx.stroke();
+
+  const shL = cx - 15;
+  const shR = cx + 15;
+  ctx.beginPath();
+  ctx.moveTo(shL, neckY + 4);
+  ctx.lineTo(shR, neckY + 4);
+  ctx.stroke();
+
+  ctx.beginPath();
+  if (isLeader) {
+    ctx.moveTo(shL, neckY + 4);
+    ctx.lineTo(shL - 10, neckY + 20);
+    ctx.lineTo(cx + 8, neckY + 20);
+  } else {
+    ctx.moveTo(shR, neckY + 4);
+    ctx.lineTo(shR + 10, neckY + 16);
+    ctx.lineTo(cx - 10, neckY + 16);
+  }
+  ctx.strokeStyle = color + "B3";
+  ctx.stroke();
+
+  const hipL = cx - 12;
+  const hipR = cx + 12;
+  ctx.beginPath();
+  ctx.moveTo(hipL, hipY);
+  ctx.lineTo(hipR, hipY);
+  ctx.strokeStyle = color;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(hipL, hipY);
+  ctx.lineTo(hipL, kneeY);
+  ctx.lineTo(hipL, ankleY);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(hipR, hipY);
+  ctx.lineTo(hipR + kneeOff, kneeY);
+  ctx.lineTo(hipR + ankleOff, ankleY);
+  ctx.stroke();
+
+  const joints = [
+    {x: cx, y: neckY},
+    {x: cx, y: hipY},
+    {x: hipL, y: kneeY},
+    {x: hipR + kneeOff, y: kneeY},
+    {x: hipL, y: ankleY},
+    {x: hipR + ankleOff, y: ankleY}
+  ];
+
+  joints.forEach(j => {
+    ctx.beginPath();
+    ctx.arc(j.x, j.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fill();
+  });
+
+  ctx.restore();
+}
+
+// Bind custom handleProfVideoUpload to window context so inline onclick resolves it
+window.handleProfVideoUpload = handleProfVideoUpload;
 window.deleteJournalEntry = deleteJournalEntry;
