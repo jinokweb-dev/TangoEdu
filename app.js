@@ -348,6 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderJournalEntries();
   });
   initMobileTabs();
+  initCurriculumControls();
   renderCurriculum();
   renderGlossary();
   initGlossaryFilters();

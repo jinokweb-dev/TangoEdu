@@ -65,17 +65,23 @@ header {
   padding: 12px 16px;
   z-index: 100;
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand-row {
+  flex: 1;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .app-banner {
-  width: 54px;
-  height: 54px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid var(--gold);
@@ -89,44 +95,29 @@ header {
 }
 
 .brand-highlight {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-primary);
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 .highlight-names {
   color: var(--gold);
   font-weight: 800;
-  font-size: 1.05rem;
-  border-bottom: 2px solid var(--crimson);
+  font-size: 0.98rem;
+  border-bottom: 1.5px solid var(--crimson);
   padding-bottom: 1px;
 }
 
 .brand-sub {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   font-weight: 500;
   margin-top: 2px;
 }
 
-/* Custom UI Controls */
-
-.btn-ctrl {
-  background: var(--panel-bg);
-  border: 1px solid var(--gold);
-  color: var(--gold);
-  padding: 4px 10px;
-  font-size: 0.9rem;
-  font-weight: bold;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all var(--transition-speed);
-}
-
-.btn-ctrl:hover {
-  background-color: var(--gold);
-  color: var(--bg-color);
+.header-ctrl-row {
+  margin-left: 8px;
 }
 
 /* Scrollable Content Area */
@@ -179,11 +170,11 @@ header {
 }
 
 .nav-icon {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
 }
 
 .nav-label {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 
@@ -233,7 +224,39 @@ p {
   font-size: 0.95rem;
 }
 
-/* Curriculum list */
+/* Course Filters */
+.course-filter-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.course-filter-btn {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--panel-border);
+  color: var(--text-secondary);
+  padding: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+}
+
+.course-filter-btn:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.course-filter-btn.active {
+  background: var(--active-tab-bg);
+  color: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+/* Curriculum list & Accordion */
 .curriculum-list {
   display: flex;
   flex-direction: column;
@@ -246,13 +269,21 @@ p {
   padding: 12px;
   border-radius: 0 var(--border-radius) var(--border-radius) 0;
   transition: all var(--transition-speed);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.week-item:hover {
+  background: rgba(212, 175, 55, 0.03);
 }
 
 .week-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  width: 100%;
 }
 
 .week-badge {
@@ -265,7 +296,7 @@ p {
 }
 
 .week-title {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--gold);
   flex: 1;
@@ -276,6 +307,82 @@ p {
   color: var(--text-secondary);
   font-size: 0.88rem;
   line-height: 1.45;
+}
+
+/* Expandable details area inside week */
+.week-details {
+  display: none;
+  padding-top: 12px;
+  margin-top: 6px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  animation: slideDown 0.3s ease-out;
+}
+
+.week-item.expanded .week-details {
+  display: block;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.week-detail-header {
+  font-weight: bold;
+  color: var(--gold-hover);
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.week-detail-desc {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.week-demo-player {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: #000;
+  max-height: 220px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+/* Professor mode upload widgets */
+.prof-upload-btn-container {
+  display: none;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dotted rgba(212, 175, 55, 0.3);
+}
+
+body.prof-mode-active .prof-upload-btn-container {
+  display: block;
+}
+
+body.prof-mode-active .week-item {
+  border-color: var(--crimson);
+  box-shadow: 0 0 8px rgba(155, 17, 30, 0.2);
+}
+
+.btn-prof-upload {
+  background: rgba(155, 17, 30, 0.15);
+  border: 1px dashed var(--crimson);
+  color: #FFC0C0;
+  width: 100%;
+  padding: 8px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+}
+
+.btn-prof-upload:hover {
+  background: var(--crimson);
+  color: white;
 }
 
 /* Glossary Styling */
@@ -391,7 +498,7 @@ p {
   color: var(--gold);
 }
 
-/* AI Analysis Styling */
+/* AI Dual Video Analysis Styling */
 .upload-container {
   border: 2px dashed var(--gold);
   border-radius: var(--border-radius);
@@ -421,29 +528,59 @@ p {
   cursor: pointer;
   border: none;
   font-size: 0.95rem;
+  transition: background var(--transition-speed);
 }
 
-.video-wrapper {
+.btn-upload:hover {
+  background: var(--crimson-hover);
+}
+
+/* Dual Side-by-Side Panel Layout */
+.dual-video-container {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.video-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0; /* prevents flex overflows */
+}
+
+.panel-label {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--gold);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+.video-wrapper-mini {
   position: relative;
   width: 100%;
-  border-radius: var(--border-radius);
+  border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--gold);
-  margin-bottom: 16px;
-  display: none;
   background: #000;
+  aspect-ratio: 4 / 3;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
-.video-wrapper.active {
-  display: block;
-}
-
-#analysis-video {
+.video-wrapper-mini video {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
-#analysis-canvas {
+.video-wrapper-mini canvas {
   position: absolute;
   top: 0;
   left: 0;
@@ -453,11 +590,17 @@ p {
   z-index: 10;
 }
 
+.sync-controls {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
 .analysis-ctrls {
   display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  margin-bottom: 16px;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .btn-action {
@@ -467,6 +610,7 @@ p {
   font-weight: bold;
   cursor: pointer;
   border: none;
+  transition: all var(--transition-speed);
 }
 
 .btn-action.primary {

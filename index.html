@@ -7,19 +7,26 @@
   <meta name="description" content="명지대학교 미래교육원 탱고마스터 과정 지도교수 홍수 & 진주 커플과 함께하는 아르헨티나 탱고 교육 및 AI 비디오 분석 어플리케이션">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="font-md">
 
   <div class="app-container">
     
     <!-- Header: App Title & Banner -->
     <header>
-      <div class="brand">
-        <!-- Generatively created professional banner -->
-        <img src="tango_banner.jpg" class="app-banner" alt="홍수 & 진주 탱고 마스터">
-        <div class="brand-text">
-          <div class="brand-highlight">탱고마스터 과정 지도교수 - <span class="highlight-names">홍수 & 진주</span></div>
-          <div class="brand-sub">명지대학교 미래교육원</div>
+      <div class="brand-row">
+        <div class="brand">
+          <img src="tango_banner.jpg" class="app-banner" alt="홍수 & 진주 탱고 마스터">
+          <div class="brand-text">
+            <div class="brand-highlight">탱고마스터 과정 지도교수 - <span class="highlight-names">홍수 & 진주</span></div>
+            <div class="brand-sub">명지대학교 미래교육원</div>
+          </div>
         </div>
+      </div>
+      
+      <div class="header-ctrl-row">
+        <button class="btn-ctrl" id="btn-prof-mode" aria-label="교수님 편집 모드 토글">
+          👑 교수님 모드 OFF
+        </button>
       </div>
     </header>
 
@@ -29,11 +36,17 @@
       <!-- Tab 1: Curriculum -->
       <section id="curriculum" class="tab-content active">
         <div class="card">
-          <h2>교수님 커리큘럼 (1학기 로드맵)</h2>
-          <p>홍수 & 진주 지도교수님이 제안하는 시니어 및 대학생을 위한 기초부터 무대 위 품격까지의 8주차 교육 과정입니다.</p>
+          <h2>교수님 커리큘럼</h2>
+          <p>세계 챔피언 홍수 & 진주 교수님의 상세한 동작 설명과 시범 영상을 통해 공부해 보세요.</p>
+          
+          <!-- Course Level Selector Tabs -->
+          <div class="course-filter-buttons">
+            <button class="course-filter-btn active" data-course="basic">🐣 탱고 시작반 (초급)</button>
+            <button class="course-filter-btn" data-course="advanced">💃 탱고 완성반 (중급)</button>
+          </div>
           
           <div class="curriculum-list" id="curriculum-container">
-            <!-- Dynamically populated in app.js -->
+            <!-- Dynamically populated in app.js with accordion rows -->
           </div>
         </div>
       </section>
@@ -41,41 +54,66 @@
       <!-- Tab 2: AI Video Analysis -->
       <section id="analysis" class="tab-content">
         <div class="card">
-          <h2>AI 탱고 마스터 동작 분석</h2>
-          <p>자신의 탱고 연습 영상을 업로드해 보세요. AI 시스템이 신체 균형, 발 디딤, 파트너 프레임(Abrazo)을 분석하고 홍수 & 진주 지도교수님의 피드백을 생성합니다.</p>
+          <h2>AI 1:1 비교 및 동작 분석</h2>
+          <p>자신의 연습 영상을 업로드해 보세요. 왼쪽의 <strong>교수님 시범 영상</strong>과 오른쪽의 <strong>나의 동작 영상</strong>을 동시 재생하며 비교 분석할 수 있습니다.</p>
           
           <!-- Video Upload Zone -->
           <div class="upload-container" id="upload-zone">
             <div class="upload-icon">📤</div>
-            <h3>여기에 탱고 연습 영상 파일을 올리거나 클릭하세요</h3>
-            <p>지원 파일: MP4, MOV, WebM (최대 100MB)</p>
+            <h3>여기에 연습 영상을 올리거나 클릭하세요</h3>
+            <p>지원 파일: MP4, MOV, WebM</p>
             <input type="file" id="video-input" class="upload-btn-real" accept="video/*">
-            <button class="btn-upload" onclick="document.getElementById('video-input').click()">파일 선택하기</button>
+            <button class="btn-upload" onclick="document.getElementById('video-input').click()">연습 비디오 선택</button>
           </div>
 
-          <!-- Video Player & Canvas Overlay -->
-          <div class="video-wrapper" id="video-wrapper">
-            <div class="scan-bar-animation" id="scan-bar"></div>
-            <video id="analysis-video" controls muted></video>
-            <canvas id="analysis-canvas"></canvas>
+          <!-- Dual Side-by-Side Video Players -->
+          <div class="dual-video-container" id="dual-video-container" style="display: none;">
+            <!-- Left: Professor Demo -->
+            <div class="video-panel master-panel">
+              <div class="panel-label">👑 지도교수 시범 (좌)</div>
+              <div class="video-wrapper-mini">
+                <div class="scan-bar-animation" id="scan-bar-master"></div>
+                <video id="analysis-video-master" playsinline loop muted></video>
+                <canvas id="analysis-canvas-master"></canvas>
+              </div>
+            </div>
+            
+            <!-- Right: Student Practice -->
+            <div class="video-panel student-panel">
+              <div class="panel-label">👤 나의 연습 동작 (우)</div>
+              <div class="video-wrapper-mini">
+                <div class="scan-bar-animation" id="scan-bar-student"></div>
+                <video id="analysis-video-student" playsinline loop muted></video>
+                <canvas id="analysis-canvas-student"></canvas>
+              </div>
+            </div>
           </div>
 
-          <!-- Analysis controls -->
-          <div class="analysis-ctrls" id="analysis-ctrls" style="display: none;">
-            <div class="form-group" style="margin-right: 10px; flex: 1;">
-              <label for="figure-select" class="form-label">분석할 동작 선택</label>
+          <!-- Synchronized Video Controls -->
+          <div class="sync-controls" id="sync-controls" style="display: none;">
+            <button class="btn-upload" id="btn-sync-play" style="flex: 2; height: 48px; background: #2ecc71;">▶️ 동시 재생</button>
+            <button class="btn-action secondary" id="btn-sync-pause" style="flex: 1; height: 48px;">⏸️ 일시 정지</button>
+            <button class="btn-action secondary" id="btn-sync-reset" style="flex: 1; height: 48px;">🔄 처음으로</button>
+          </div>
+
+          <!-- Analysis parameters selector -->
+          <div class="analysis-ctrls" id="analysis-ctrls" style="display: none; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+            <div class="form-group" style="width: 100%; margin-bottom: 15px;">
+              <label for="figure-select" class="form-label">비교 분석할 주차 / 피구라 선택</label>
               <select id="figure-select" class="form-input">
-                <option value="caminata">카미나타 (Caminata - 걷기)</option>
-                <option value="salida">살리다 바시카 (Salida Básica - 8보 기초)</option>
-                <option value="ocho_cortado">오초 코르타도 (Ocho Cortado - 자르기)</option>
-                <option value="giro">히로 (Giro - 회전)</option>
+                <option value="1">1주차: 바른 자세와 걷기 (Caminata)</option>
+                <option value="2">2주차: 기본 8보 (Salida Básica)</option>
+                <option value="3">3주차: 오초 코르타도 (Ocho Cortado)</option>
+                <option value="4">4주차: 부드러운 피벗 (Ocho)</option>
+                <option value="5">5주차: 회전 테크닉 (Giro)</option>
+                <option value="6">6주차: 음악성 학습 (Musicality)</option>
+                <option value="7">7주차: 사카다와 보레오 (Sacada & Boleo)</option>
+                <option value="8">8주차: 에티켓 (Codigos)</option>
               </select>
             </div>
-            <button class="btn-action primary" id="btn-start-analysis" style="align-self: flex-end; height: 48px; min-width: 100px;">
-              🔍 분석
-            </button>
-            <button class="btn-action secondary" id="btn-reset-analysis" style="align-self: flex-end; height: 48px; min-width: 80px;">
-              🔄 초기화
+            
+            <button class="btn-upload" id="btn-start-analysis" style="width: 100%; height: 50px; font-size: 1.05rem;">
+              🔍 AI 스케일 분석 및 스캔 시작
             </button>
           </div>
 
