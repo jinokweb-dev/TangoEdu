@@ -1418,15 +1418,15 @@ function handleMasterVideoUpload(inputEl) {
   const figureSelect = document.getElementById("figure-select");
   const weekId = figureSelect.value;
   
-  const btn = inputEl.nextElementSibling;
+  const btn = inputEl.parentNode.querySelector('.btn-prof-upload');
   if (btn) {
-    btn.textContent = "⚙️ 파일 업로드 및 저장 중...";
+    btn.textContent = "⚙️ 저장 중...";
     btn.disabled = true;
   }
 
   saveCurriculumVideo(weekId, file, () => {
     if (btn) {
-      btn.textContent = "📹 이 주차 시범 영상 등록/변경";
+      btn.textContent = "📹 시범 영상 등록";
       btn.disabled = false;
     }
     loadProfessorDemoVideo(weekId);
@@ -1435,4 +1435,27 @@ function handleMasterVideoUpload(inputEl) {
   });
 }
 
+function deleteMasterVideo() {
+  const figureSelect = document.getElementById("figure-select");
+  const weekId = figureSelect.value;
+  
+  if (!db) {
+    alert("데이터베이스가 연결되지 않았습니다.");
+    return;
+  }
+  
+  if (confirm(`${weekId}주차 지도교수 시범 영상을 삭제하시겠습니까?`)) {
+    const transaction = db.transaction([STORE_CURRICULUM], "readwrite");
+    const store = transaction.objectStore(STORE_CURRICULUM);
+    const request = store.delete(weekId.toString());
+    
+    request.onsuccess = () => {
+      loadProfessorDemoVideo(weekId);
+      renderCurriculum();
+      alert(`${weekId}주차 지도교수 시범 영상이 삭제되었습니다.`);
+    };
+  }
+}
+
 window.handleMasterVideoUpload = handleMasterVideoUpload;
+window.deleteMasterVideo = deleteMasterVideo;
