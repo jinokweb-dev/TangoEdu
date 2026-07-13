@@ -191,7 +191,6 @@ const ANALYSIS_REPORTS = {
 // 2. STATE VARIABLES
 // ==========================================
 let activeTab = "curriculum";
-let fontSizeClass = "font-md";
 let activeGlossaryCategory = "all";
 let searchKeyword = "";
 
@@ -348,7 +347,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initIndexedDB(() => {
     renderJournalEntries();
   });
-  initAccessibility();
   initMobileTabs();
   renderCurriculum();
   renderGlossary();
@@ -358,31 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initJournalForm();
 });
 
-// Font size scaling (Accessibility for seniors)
-function initAccessibility() {
-  const fontClasses = ["font-sm", "font-md", "font-lg", "font-xl"];
-  const buttons = {
-    "btn-font-sm": "font-sm",
-    "btn-font-md": "font-md",
-    "btn-font-lg": "font-lg",
-    "btn-font-xl": "font-xl"
-  };
 
-  Object.entries(buttons).forEach(([btnId, cls]) => {
-    const el = document.getElementById(btnId);
-    if (!el) return;
-    
-    el.addEventListener("click", () => {
-      fontClasses.forEach(c => document.body.classList.remove(c));
-      document.body.classList.add(cls);
-      fontSizeClass = cls;
-      
-      Object.keys(buttons).forEach(id => {
-        document.getElementById(id).style.borderWidth = (id === btnId) ? "2px" : "1px";
-      });
-    });
-  });
-}
 
 // Mobile Bottom Navigation Tabs Handler
 function initMobileTabs() {
