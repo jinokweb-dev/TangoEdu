@@ -358,7 +358,69 @@ function fetchCurriculumVideo(weekId, callback) {
 }
 
 // ==========================================
-// 5. ACCORDION CURRICULUM RENDER & CONTROLS
+// 5. APPLICATION INITIALIZATION & CORE LOGIC
+// ==========================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  initIndexedDB(() => {
+    renderJournalEntries();
+  });
+  initMobileTabs();
+  initCurriculumControls();
+  renderCurriculum();
+  renderGlossary();
+  initGlossaryFilters();
+  initMetronome();
+  initAIAnalysis();
+  initJournalForm();
+});
+
+// Mobile Bottom Navigation Tabs Handler
+function initMobileTabs() {
+  const tabs = document.querySelectorAll(".nav-tab");
+  const contentArea = document.querySelector(".content-area");
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.tab;
+      
+      // Update active menu tab
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+
+      // Update section contents
+      document.querySelectorAll(".tab-content").forEach(section => {
+        section.classList.remove("active");
+      });
+      document.getElementById(target).classList.add("active");
+      
+      activeTab = target;
+
+      // Reset scroll position of inner area to top for seamless mobile feel
+      if (contentArea) {
+        contentArea.scrollTop = 0;
+      }
+
+      // Stop metronome or videos when leaving tabs to respect resource constraints
+      if (target !== 'rhythm' && metroPlaying) {
+        toggleMetronome();
+      }
+      if (target !== 'analysis') {
+        const vidMaster = document.getElementById('analysis-video-master');
+        const vidStudent = document.getElementById('analysis-video-student');
+        if (vidMaster && !vidMaster.paused) vidMaster.pause();
+        if (vidStudent && !vidStudent.paused) vidStudent.pause();
+        if (canvasAnimationId) {
+          cancelAnimationFrame(canvasAnimationId);
+          canvasAnimationId = null;
+        }
+      }
+    });
+  });
+}
+
+// ==========================================
+// 6. ACCORDION CURRICULUM RENDER & CONTROLS
 // ==========================================
 
 function renderCurriculum() {
@@ -405,7 +467,7 @@ function renderCurriculum() {
         <p style="font-size:0.8rem; color: var(--text-secondary); text-align:center; padding: 15px 0;">영상을 불러오고 있습니다...</p>
       </div>
       
-      <!-- Upload controls (unconditionally visible for professors/students to manage) -->
+      <!-- Upload controls -->
       <div class="prof-upload-btn-container" onclick="event.stopPropagation();">
         <input type="file" id="prof-file-w${w.week}" accept="video/*" style="display:none;" onchange="handleProfVideoUpload(${w.week}, this)">
         <button class="btn-prof-upload" onclick="document.getElementById('prof-file-w${w.week}').click()">📹 ${w.week}주차 시범 영상 변경/등록</button>
@@ -483,8 +545,6 @@ function handleProfVideoUpload(weekId, inputEl) {
   });
 }
 
-window.handleProfVideoUpload = handleProfVideoUpload;
-
 function initCurriculumControls() {
   const filterBtns = document.querySelectorAll(".course-filter-btn");
 
@@ -499,7 +559,7 @@ function initCurriculumControls() {
 }
 
 // ==========================================
-// 6. MODULE: GLOSSARY (SEARCH & FILTER)
+// 7. MODULE: GLOSSARY (SEARCH & FILTER)
 // ==========================================
 function renderGlossary() {
   const container = document.getElementById("glossary-container");
@@ -568,7 +628,7 @@ function initGlossaryFilters() {
 }
 
 // ==========================================
-// 7. MODULE: RHYTHM METRONOME
+// 8. MODULE: RHYTHM METRONOME
 // ==========================================
 function initMetronome() {
   const tempoSlider = document.getElementById("tempo-range");
@@ -710,8 +770,36 @@ function resetMetronomeUI() {
   if (dot) dot.classList.remove("active-beat", "strong-beat");
 }
 
+function playMetronomeClick(isStrong) {
+  try {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    const frequency = isStrong ? 950 : 550;
+    osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+    
+    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + 0.08);
+  } catch (e) {
+    console.warn("AudioContext metronome synthesis failed.", e);
+  }
+}
+
 // ==========================================
-// 8. MODULE: AI SIDE-BY-SIDE VIDEO ANALYSIS
+// 9. MODULE: AI SIDE-BY-SIDE VIDEO ANALYSIS
 // ==========================================
 function initAIAnalysis() {
   const videoInput = document.getElementById("video-input");
@@ -904,6 +992,49 @@ function startDualCanvasLoops() {
   canvasAnimationId = requestAnimationFrame(updateCanvasFrames);
 }
 
+function showAnalysisReport(figure) {
+  const report = ANALYSIS_REPORTS[figure] || ANALYSIS_REPORTS[1];
+  const reportPanel = document.getElementById("report-panel");
+  if (!reportPanel) return;
+  
+  document.getElementById("report-score").textContent = `종합 ${report.score}점`;
+  
+  document.getElementById("metric-axis-text").textContent = getRatingString(report.axisScore);
+  const axisFill = document.getElementById("metric-axis-fill");
+  axisFill.className = `metric-fill ${getScoreClass(report.axisScore)}`;
+  axisFill.style.width = `${report.axisScore}%`;
+
+  document.getElementById("metric-connection-text").textContent = getRatingString(report.connectionScore);
+  const connFill = document.getElementById("metric-connection-fill");
+  connFill.className = `metric-fill ${getScoreClass(report.connectionScore)}`;
+  connFill.style.width = `${report.connectionScore}%`;
+
+  document.getElementById("metric-musicality-text").textContent = getRatingString(report.musicalityScore);
+  const musFill = document.getElementById("metric-musicality-fill");
+  musFill.className = `metric-fill ${getScoreClass(report.musicalityScore)}`;
+  musFill.style.width = `${report.musicalityScore}%`;
+
+  document.getElementById("feedback-strengths").textContent = report.strengths;
+  document.getElementById("feedback-improvements").textContent = report.improvements;
+  document.getElementById("feedback-professor-tip").innerHTML = `"<strong>홍수 & 진주 교수의 원포인트 레슨:</strong> ${report.tip}"`;
+
+  reportPanel.classList.add("active");
+  reportPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function getRatingString(score) {
+  if (score >= 90) return `매우 우수 (${score}점)`;
+  if (score >= 80) return `우수 (${score}점)`;
+  if (score >= 70) return `보완 필요 (${score}점)`;
+  return `재훈련 요망 (${score}점)`;
+}
+
+function getScoreClass(score) {
+  if (score >= 85) return 'good';
+  if (score >= 70) return 'warning';
+  return '';
+}
+
 function resetAnalysisStudio() {
   const uploadZone = document.getElementById("upload-zone");
   const dualVideoContainer = document.getElementById("dual-video-container");
@@ -954,7 +1085,7 @@ function resetAnalysisStudio() {
 }
 
 // ==========================================
-// 9. MODULE: PERSISTENT PRACTICE JOURNAL
+// 10. MODULE: PERSISTENT PRACTICE JOURNAL
 // ==========================================
 function initJournalForm() {
   const form = document.getElementById("journal-form");
@@ -1141,7 +1272,7 @@ function renderJournalEntries() {
 }
 
 // ==========================================
-// 10. HELPER: SKELETON DRAWER (VIDEO OVERLAY CANVAS)
+// 11. HELPER: SKELETON DRAWER (VIDEO OVERLAY CANVAS)
 // ==========================================
 function drawSimulatedSkeleton(ctx, width, height, time, figure) {
   ctx.clearRect(0, 0, width, height);
@@ -1278,6 +1409,5 @@ function drawSkeletonPerson(ctx, cx, neckY, hipY, kneeY, ankleY, kneeOff, ankleO
   ctx.restore();
 }
 
-// Bind custom handleProfVideoUpload to window context so inline onclick resolves it
 window.handleProfVideoUpload = handleProfVideoUpload;
 window.deleteJournalEntry = deleteJournalEntry;
