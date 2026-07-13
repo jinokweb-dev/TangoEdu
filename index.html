@@ -2,277 +2,301 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>홍수 & 진주 지도교수의 탱고 마스터클래스</title>
-  <meta name="description" content="탱고 세계 챔피언 홍수 & 진주 지도교수와 함께하는 아르헨티나 탱고 교육 및 AI 동작 분석 어플리케이션">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>탱고마스터 과정 지도교수 - 홍수 & 진주 | 명지대학교 미래교육원</title>
+  <meta name="description" content="명지대학교 미래교육원 탱고마스터 과정 지도교수 홍수 & 진주 커플과 함께하는 아르헨티나 탱고 교육 및 AI 비디오 분석 어플리케이션">
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="font-md">
 
-  <!-- Header: App Title & Accessibility Controls -->
-  <header>
-    <div class="brand">
-      <h1>홍수 & 진주 탱고 아카데미</h1>
-      <span class="subtitle">세계 챔피언 지도교수의 마스터클래스</span>
-    </div>
+  <div class="app-container">
     
-    <div class="accessibility-ctrl">
-      <span>글자 크기</span>
-      <button class="btn-ctrl" id="btn-font-sm" aria-label="작은 글씨">A-</button>
-      <button class="btn-ctrl" id="btn-font-md" aria-label="보통 글씨" style="border-width: 2px;">A</button>
-      <button class="btn-ctrl" id="btn-font-lg" aria-label="큰 글씨">A+</button>
-      <button class="btn-ctrl" id="btn-font-xl" aria-label="아주 큰 글씨">A++</button>
-    </div>
-  </header>
-
-  <!-- Navigation Tabs -->
-  <nav aria-label="메인 메뉴">
-    <button class="tab-btn active" data-tab="curriculum">
-      📅 주차별 강의
-    </button>
-    <button class="tab-btn" data-tab="analysis">
-      🤖 AI 동작 분석
-    </button>
-    <button class="tab-btn" data-tab="glossary">
-      📖 탱고 용어집
-    </button>
-    <button class="tab-btn" data-tab="rhythm">
-      🥁 박자 학습기
-    </button>
-    <button class="tab-btn" data-tab="journal">
-      ✍️ 연습 일지
-    </button>
-  </nav>
-
-  <!-- Main Content -->
-  <main>
-    
-    <!-- Tab 1: Curriculum -->
-    <section id="curriculum" class="tab-content active">
-      <div class="card">
-        <h2>교수님 커리큘럼 (1학기 로드맵)</h2>
-        <p>홍수 & 진주 지도교수님이 제안하는 시니어 및 대학생을 위한 기초부터 무대 위 품격까지의 8주차 교육 과정입니다.</p>
-        
-        <div class="curriculum-list" id="curriculum-container">
-          <!-- Dynamically populated in app.js -->
+    <!-- Header: App Title, Banner & Accessibility Controls -->
+    <header>
+      <div class="brand">
+        <!-- Generatively created professional banner -->
+        <img src="tango_banner.jpg" class="app-banner" alt="홍수 & 진주 탱고 마스터">
+        <div class="brand-text">
+          <div class="brand-highlight">탱고마스터 과정 지도교수 - <span class="highlight-names">홍수 & 진주</span></div>
+          <div class="brand-sub">명지대학교 미래교육원</div>
         </div>
       </div>
-    </section>
+      
+      <div class="accessibility-ctrl">
+        <span>글자 크기</span>
+        <button class="btn-ctrl" id="btn-font-sm" aria-label="작은 글씨">A-</button>
+        <button class="btn-ctrl" id="btn-font-md" aria-label="보통 글씨" style="border-width: 2px;">A</button>
+        <button class="btn-ctrl" id="btn-font-lg" aria-label="큰 글씨">A+</button>
+        <button class="btn-ctrl" id="btn-font-xl" aria-label="아주 큰 글씨">A++</button>
+      </div>
+    </header>
 
-    <!-- Tab 2: AI Video Analysis -->
-    <section id="analysis" class="tab-content">
-      <div class="card">
-        <h2>AI 탱고 마스터 동작 분석</h2>
-        <p>자신의 탱고 연습 영상을 업로드해 보세요. AI 시스템이 신체 균형, 발 디딤, 파트너 프레임(Abrazo)을 분석하고 홍수 & 진주 지도교수님의 피드백을 생성합니다.</p>
-        
-        <!-- Video Upload Zone -->
-        <div class="upload-container" id="upload-zone">
-          <div class="upload-icon">📤</div>
-          <h3>여기에 탱고 연습 영상 파일을 올리거나 클릭하세요</h3>
-          <p>지원 파일: MP4, MOV, WebM (최대 100MB)</p>
-          <input type="file" id="video-input" class="upload-btn-real" accept="video/*">
-          <button class="btn-upload" onclick="document.getElementById('video-input').click()">파일 선택하기</button>
-        </div>
-
-        <!-- Video Player & Canvas Overlay -->
-        <div class="video-wrapper" id="video-wrapper">
-          <div class="scan-bar-animation" id="scan-bar"></div>
-          <video id="analysis-video" controls muted></video>
-          <canvas id="analysis-canvas"></canvas>
-        </div>
-
-        <!-- Analysis controls -->
-        <div class="analysis-ctrls" id="analysis-ctrls" style="display: none;">
-          <div class="form-group" style="margin-right: 15px; flex: 1;">
-            <label for="figure-select" class="form-label">분석할 동작 선택</label>
-            <select id="figure-select" class="form-input">
-              <option value="caminata">카미나타 (Caminata - 걷기)</option>
-              <option value="salida">살리다 바시카 (Salida Básica - 8보 기초)</option>
-              <option value="ocho_cortado">오초 코르타도 (Ocho Cortado - 자르기)</option>
-              <option value="giro">히로 (Giro - 회전)</option>
-            </select>
-          </div>
-          <button class="btn-action primary" id="btn-start-analysis" style="align-self: flex-end; height: 48px;">
-            🔍 AI 분석 시작
-          </button>
-          <button class="btn-action secondary" id="btn-reset-analysis" style="align-self: flex-end; height: 48px;">
-            🔄 비디오 초기화
-          </button>
-        </div>
-
-        <div class="scan-status" id="scan-status">
-          🤖 영상 데이터를 정밀 스캔하는 중... (0%)
-        </div>
-
-        <!-- AI Feedback Report -->
-        <div class="report-panel" id="report-panel">
-          <div class="report-header">
-            <h3>AI 동작 분석 진단서</h3>
-            <div class="score-badge" id="report-score">종합 85점</div>
-          </div>
+    <!-- Scrollable Content Area -->
+    <div class="content-area">
+      
+      <!-- Tab 1: Curriculum -->
+      <section id="curriculum" class="tab-content active">
+        <div class="card">
+          <h2>교수님 커리큘럼 (1학기 로드맵)</h2>
+          <p>홍수 & 진주 지도교수님이 제안하는 시니어 및 대학생을 위한 기초부터 무대 위 품격까지의 8주차 교육 과정입니다.</p>
           
-          <div class="metric-grid">
-            <div class="metric-card">
-              <div class="metric-name">자세 및 중심 축 (Postura & Eje)</div>
-              <div class="metric-status" id="metric-axis-text">우수 (90점)</div>
-              <div class="metric-meter">
-                <div class="metric-fill good" id="metric-axis-fill" style="width: 90%;"></div>
-              </div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-name">파트너 커넥션 (Abrazo/Connection)</div>
-              <div class="metric-status" id="metric-connection-text">보완 필요 (75점)</div>
-              <div class="metric-meter">
-                <div class="metric-fill warning" id="metric-connection-fill" style="width: 75%;"></div>
-              </div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-name">음악성 및 박자 (Musicality)</div>
-              <div class="metric-status" id="metric-musicality-text">양호 (80점)</div>
-              <div class="metric-meter">
-                <div class="metric-fill good" id="metric-musicality-fill" style="width: 80%;"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="report-feedback">
-            <div class="feedback-section">
-              <div class="feedback-title">💡 잘된 부분 (Strengths)</div>
-              <div class="feedback-text" id="feedback-strengths">
-                상체의 곧은 축이 아주 안정적입니다. Caminata 시에 무릎을 스치며 나아가는 동작이 매우 자연스럽습니다.
-              </div>
-            </div>
-            <div class="feedback-section" style="margin-top: 15px;">
-              <div class="feedback-title">⚠️ 보완점 (Improvements)</div>
-              <div class="feedback-text" id="feedback-improvements">
-                파트너와의 간격이 Giro 시점에 흔들립니다. 오른팔의 프레임이 무너지지 않도록 텐션을 일정하게 유지해야 합니다.
-              </div>
-            </div>
-            <div class="feedback-section" style="margin-top: 15px; border-top: 1px dashed var(--gold); padding-top: 15px;">
-              <div class="feedback-title">👑 홍수 & 진주 교수의 원포인트 레슨</div>
-              <div class="feedback-text" id="feedback-professor-tip" style="font-style: italic; color: var(--gold-hover);">
-                "축이 무너지기 쉬운 시니어분들은 보폭을 지나치게 넓히지 마시고, 아브라소 안에서 가슴의 커넥션과 척추의 수직 정렬에 더 집중해 보세요. 훌륭한 춤입니다!"
-              </div>
-            </div>
+          <div class="curriculum-list" id="curriculum-container">
+            <!-- Dynamically populated in app.js -->
           </div>
         </div>
+      </section>
 
-      </div>
-    </section>
-
-    <!-- Tab 3: Glossary -->
-    <section id="glossary" class="tab-content">
-      <div class="card">
-        <h2>탱고 핵심 용어집</h2>
-        <p>홍수 & 진주 지도교수가 엄선한 아르헨티나 탱고 필수 전문 용어와 실전 학습 가이드입니다.</p>
-        
-        <!-- Search and Filter controls -->
-        <div class="search-bar">
-          <input type="text" class="search-input" id="glossary-search" placeholder="용어 이름 검색 (예: Ocho, Abrazo, 살리다...)">
-          <button class="btn-search" id="btn-search-clear">초기화</button>
-        </div>
-
-        <div class="category-tags" id="glossary-tags">
-          <span class="tag active" data-category="all">전체</span>
-          <span class="tag" data-category="basic">기초 동작</span>
-          <span class="tag" data-category="advanced">고급 피구라</span>
-          <span class="tag" data-category="connection">커넥션/에티켓</span>
-          <span class="tag" data-category="music">음악 및 리듬</span>
-        </div>
-
-        <!-- Glossary Results -->
-        <div class="glossary-list" id="glossary-container">
-          <!-- Dynamically populated in app.js -->
-        </div>
-      </div>
-    </section>
-
-    <!-- Tab 4: Rhythm/Metronome -->
-    <section id="rhythm" class="tab-content">
-      <div class="card">
-        <h2>뮤지컬리티 & 슬로우 메트로놈</h2>
-        <p>탱고 음악의 특유의 강약 구조를 시각화하여 비트를 몸으로 익힐 수 있는 학습 도구입니다. 시니어분들의 슬로우 훈련을 환영합니다.</p>
-        
-        <div class="rhythm-visualizer-container">
-          <!-- Visual Metronome Wheel -->
-          <div class="visual-metronome" id="visual-metro-wheel">
-            <div class="metronome-dot" id="metro-dot"></div>
+      <!-- Tab 2: AI Video Analysis -->
+      <section id="analysis" class="tab-content">
+        <div class="card">
+          <h2>AI 탱고 마스터 동작 분석</h2>
+          <p>자신의 탱고 연습 영상을 업로드해 보세요. AI 시스템이 신체 균형, 발 디딤, 파트너 프레임(Abrazo)을 분석하고 홍수 & 진주 지도교수님의 피드백을 생성합니다.</p>
+          
+          <!-- Video Upload Zone -->
+          <div class="upload-container" id="upload-zone">
+            <div class="upload-icon">📤</div>
+            <h3>여기에 탱고 연습 영상 파일을 올리거나 클릭하세요</h3>
+            <p>지원 파일: MP4, MOV, WebM (최대 100MB)</p>
+            <input type="file" id="video-input" class="upload-btn-real" accept="video/*">
+            <button class="btn-upload" onclick="document.getElementById('video-input').click()">파일 선택하기</button>
           </div>
 
-          <!-- Beat Nodes 1-4 -->
-          <div class="beat-indicators" id="beat-indicators">
-            <div class="beat-node strong" data-beat="1">1</div>
-            <div class="beat-node" data-beat="2">2</div>
-            <div class="beat-node strong" data-beat="3">3</div>
-            <div class="beat-node" data-beat="4">4</div>
+          <!-- Video Player & Canvas Overlay -->
+          <div class="video-wrapper" id="video-wrapper">
+            <div class="scan-bar-animation" id="scan-bar"></div>
+            <video id="analysis-video" controls muted></video>
+            <canvas id="analysis-canvas"></canvas>
           </div>
 
-          <div class="metro-controls">
-            <!-- BPM control -->
-            <div class="bpm-display"><span id="bpm-value">60</span> BPM</div>
-            
-            <div class="tempo-slider-container">
-              <span>🐢</span>
-              <input type="range" class="tempo-slider" id="tempo-range" min="40" max="110" value="60">
-              <span>🐇</span>
+          <!-- Analysis controls -->
+          <div class="analysis-ctrls" id="analysis-ctrls" style="display: none;">
+            <div class="form-group" style="margin-right: 10px; flex: 1;">
+              <label for="figure-select" class="form-label">분석할 동작 선택</label>
+              <select id="figure-select" class="form-input">
+                <option value="caminata">카미나타 (Caminata - 걷기)</option>
+                <option value="salida">살리다 바시카 (Salida Básica - 8보 기초)</option>
+                <option value="ocho_cortado">오초 코르타도 (Ocho Cortado - 자르기)</option>
+                <option value="giro">히로 (Giro - 회전)</option>
+              </select>
             </div>
-
-            <!-- Rhythm Type Selector -->
-            <div class="rhythm-options">
-              <button class="btn-ctrl" id="rhythm-tango" style="border-width: 2px;">Tango (4/4)</button>
-              <button class="btn-ctrl" id="rhythm-milonga">Milonga (2/4)</button>
-              <button class="btn-ctrl" id="rhythm-vals">Vals (3/4)</button>
-            </div>
-
-            <!-- Play/Pause Button -->
-            <button class="btn-upload" id="btn-metro-play" style="width: 160px; font-size: 1.1rem; padding: 15px 0;">
-              ▶️ 비트 시작
+            <button class="btn-action primary" id="btn-start-analysis" style="align-self: flex-end; height: 48px; min-width: 100px;">
+              🔍 분석
+            </button>
+            <button class="btn-action secondary" id="btn-reset-analysis" style="align-self: flex-end; height: 48px; min-width: 80px;">
+              🔄 초기화
             </button>
           </div>
+
+          <div class="scan-status" id="scan-status">
+            🤖 영상 데이터를 정밀 스캔하는 중... (0%)
+          </div>
+
+          <!-- AI Feedback Report -->
+          <div class="report-panel" id="report-panel">
+            <div class="report-header">
+              <h3>AI 동작 분석 진단서</h3>
+              <div class="score-badge" id="report-score">종합 85점</div>
+            </div>
+            
+            <div class="metric-grid">
+              <div class="metric-card">
+                <div class="metric-name">자세 및 중심 축 (Postura & Eje)</div>
+                <div class="metric-status" id="metric-axis-text">우수 (90점)</div>
+                <div class="metric-meter">
+                  <div class="metric-fill good" id="metric-axis-fill" style="width: 90%;"></div>
+                </div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-name">파트너 커넥션 (Abrazo)</div>
+                <div class="metric-status" id="metric-connection-text">보완 필요 (75점)</div>
+                <div class="metric-meter">
+                  <div class="metric-fill warning" id="metric-connection-fill" style="width: 75%;"></div>
+                </div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-name">음악성 및 박자 (Musicality)</div>
+                <div class="metric-status" id="metric-musicality-text">양호 (80점)</div>
+                <div class="metric-meter">
+                  <div class="metric-fill good" id="metric-musicality-fill" style="width: 80%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="report-feedback">
+              <div class="feedback-section">
+                <div class="feedback-title">💡 잘된 부분</div>
+                <div class="feedback-text" id="feedback-strengths">
+                  상체의 곧은 축이 아주 안정적입니다. Caminata 시에 무릎을 스치며 나아가는 동작이 매우 자연스럽습니다.
+                </div>
+              </div>
+              <div class="feedback-section" style="margin-top: 12px;">
+                <div class="feedback-title">⚠️ 보완점</div>
+                <div class="feedback-text" id="feedback-improvements">
+                  파트너와의 간격이 Giro 시점에 흔들립니다. 오른팔의 프레임이 무너지지 않도록 텐션을 일정하게 유지해야 합니다.
+                </div>
+              </div>
+              <div class="feedback-section" style="margin-top: 12px; border-top: 1px dashed var(--gold); padding-top: 12px;">
+                <div class="feedback-title">👑 홍수 & 진주 교수의 원포인트 레슨</div>
+                <div class="feedback-text" id="feedback-professor-tip" style="font-style: italic; color: var(--gold-hover);">
+                  "축이 무너지기 쉬운 시니어분들은 보폭을 지나치게 넓히지 마시고, 아브라소 안에서 가슴의 커넥션과 척추의 수직 정렬에 더 집중해 보세요."
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Tab 5: Journal -->
-    <section id="journal" class="tab-content">
-      <div class="card">
-        <h2>나의 탱고 연습 일지</h2>
-        <p>교수님이 내주신 과제나 오늘 수업에서 강조된 피드백을 기록하여 내 실력을 체계적으로 발전시켜 보세요.</p>
-        
-        <form class="journal-form" id="journal-form" onsubmit="return false;">
-          <div class="form-group">
-            <label class="form-label" for="journal-date">연습 날짜</label>
-            <input type="date" id="journal-date" class="form-input" required>
+      <!-- Tab 3: Glossary -->
+      <section id="glossary" class="tab-content">
+        <div class="card">
+          <h2>탱고 핵심 용어집</h2>
+          <p>홍수 & 진주 지도교수가 엄선한 아르헨티나 탱고 필수 전문 용어와 실전 학습 가이드입니다.</p>
+          
+          <!-- Search and Filter controls -->
+          <div class="search-bar">
+            <input type="text" class="search-input" id="glossary-search" placeholder="용어 이름 검색 (예: Ocho, Abrazo...)">
+            <button class="btn-search" id="btn-search-clear">초기화</button>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="journal-title">연습 피구라 / 주제</label>
-            <input type="text" id="journal-title" class="form-input" placeholder="예: Caminata & Ocho Cortado" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="journal-notes">교수님 강조 피드백 및 나의 보안점 메모</label>
-            <textarea id="journal-notes" class="form-textarea" placeholder="예: 살리다 5보에서 파트너의 축을 밀지 않도록 가슴 뒤집기를 자제하고 발등 커넥션 유지할 것!" required></textarea>
-          </div>
-          <button class="btn-upload" id="btn-save-journal" type="submit" style="margin-top: 10px;">💾 일지 기록하기</button>
-        </form>
 
-        <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 25px 0;">
+          <div class="category-tags" id="glossary-tags">
+            <span class="tag active" data-category="all">전체</span>
+            <span class="tag" data-category="basic">기초 동작</span>
+            <span class="tag" data-category="advanced">고급 피구라</span>
+            <span class="tag" data-category="connection">커넥션/에티켓</span>
+            <span class="tag" data-category="music">음악 및 리듬</span>
+          </div>
 
-        <h3>기록된 연습 일지 목록</h3>
-        <div class="journal-list" id="journal-container">
-          <!-- Dynamically populated in app.js -->
+          <!-- Glossary Results -->
+          <div class="glossary-list" id="glossary-container">
+            <!-- Dynamically populated in app.js -->
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-  </main>
+      <!-- Tab 4: Rhythm/Metronome -->
+      <section id="rhythm" class="tab-content">
+        <div class="card">
+          <h2>뮤지컬리티 & 슬로우 메트로놈</h2>
+          <p>탱고 음악의 특유의 강약 구조를 시각화하여 비트를 몸으로 익힐 수 있는 학습 도구입니다.</p>
+          
+          <div class="rhythm-visualizer-container">
+            <!-- Visual Metronome Wheel -->
+            <div class="visual-metronome" id="visual-metro-wheel">
+              <div class="metronome-dot" id="metro-dot"></div>
+            </div>
 
-  <!-- Footer -->
-  <footer>
-    <p>© 2026 홍수 & 진주 지도교수의 탱고 아카데미 | Tango World Champions Masterclass</p>
-    <p style="font-size: 0.75rem; margin-top: 5px; color: var(--text-secondary);">
-      시니어 및 대학생들의 평생교육 접근성을 위해 설계된 배움 중심 플랫폼입니다.
-    </p>
-  </footer>
+            <!-- Beat Nodes 1-4 -->
+            <div class="beat-indicators" id="beat-indicators">
+              <div class="beat-node strong" data-beat="1">1</div>
+              <div class="beat-node" data-beat="2">2</div>
+              <div class="beat-node strong" data-beat="3">3</div>
+              <div class="beat-node" data-beat="4">4</div>
+            </div>
+
+            <div class="metro-controls">
+              <!-- BPM control -->
+              <div class="bpm-display"><span id="bpm-value">60</span> BPM</div>
+              
+              <div class="tempo-slider-container">
+                <span>🐢</span>
+                <input type="range" class="tempo-slider" id="tempo-range" min="40" max="110" value="60">
+                <span>🐇</span>
+              </div>
+
+              <!-- Rhythm Type Selector -->
+              <div class="rhythm-options">
+                <button class="btn-ctrl" id="rhythm-tango" style="border-width: 2px;">Tango (4/4)</button>
+                <button class="btn-ctrl" id="rhythm-milonga">Milonga (2/4)</button>
+                <button class="btn-ctrl" id="rhythm-vals">Vals (3/4)</button>
+              </div>
+
+              <!-- Play/Pause Button -->
+              <button class="btn-upload" id="btn-metro-play" style="width: 100%; max-width: 200px; font-size: 1.1rem; padding: 15px 0;">
+                ▶️ 비트 시작
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 5: Journal -->
+      <section id="journal" class="tab-content">
+        <div class="card">
+          <h2>나의 탱고 연습 일지</h2>
+          <p>교수님이 내주신 과제나 오늘 수업에서 강조된 피드백을 기록하고 본인의 연습 영상을 업로드하여 누적해 보세요.</p>
+          
+          <form class="journal-form" id="journal-form" onsubmit="return false;">
+            <div class="form-group">
+              <label class="form-label" for="journal-date">연습 날짜</label>
+              <input type="date" id="journal-date" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="journal-title">연습 피구라 / 주제</label>
+              <input type="text" id="journal-title" class="form-input" placeholder="예: Caminata & Ocho Cortado" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="journal-notes">수업 요약 및 나의 보완점 메모</label>
+              <textarea id="journal-notes" class="form-textarea" placeholder="예: 척추 축을 똑바로 세우고 가슴을 무너뜨리지 말 것!" required></textarea>
+            </div>
+            
+            <!-- Video Upload Field for Journal -->
+            <div class="form-group">
+              <label class="form-label" for="journal-video-input">연습 영상 업로드 (IndexedDB에 보존)</label>
+              <div class="file-upload-wrapper">
+                <input type="file" id="journal-video-input" class="form-input-file" accept="video/*">
+                <button type="button" class="btn-ctrl" id="btn-journal-file-trigger" style="width: 100%; height: 44px;">📹 연습 영상 선택하기</button>
+                <span id="journal-file-name" class="file-name-display">선택된 영상 없음</span>
+              </div>
+            </div>
+            
+            <button class="btn-upload" id="btn-save-journal" type="submit" style="margin-top: 10px; width: 100%;">💾 일지 기록하기</button>
+          </form>
+
+          <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 25px 0;">
+
+          <h3>누적된 연습 일지 목록</h3>
+          <div class="journal-list" id="journal-container">
+            <!-- Dynamically populated in app.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer Inside Scrollable Content -->
+      <footer>
+        <p>© 2026 홍수 & 진주 탱고 마스터클래스</p>
+        <p style="font-size: 0.75rem; margin-top: 5px; color: var(--text-secondary);">
+          명지대학교 미래교육원 탱고과정
+        </p>
+      </footer>
+
+    </div>
+
+    <!-- Bottom Navigation Bar (Mobile App Bar) -->
+    <nav class="bottom-nav" aria-label="하단 메뉴">
+      <button class="nav-tab active" data-tab="curriculum">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">커리큘럼</span>
+      </button>
+      <button class="nav-tab" data-tab="analysis">
+        <span class="nav-icon">🤖</span>
+        <span class="nav-label">AI 분석</span>
+      </button>
+      <button class="nav-tab" data-tab="glossary">
+        <span class="nav-icon">📖</span>
+        <span class="nav-label">용어집</span>
+      </button>
+      <button class="nav-tab" data-tab="rhythm">
+        <span class="nav-icon">🥁</span>
+        <span class="nav-label">박자학습</span>
+      </button>
+      <button class="nav-tab" data-tab="journal">
+        <span class="nav-icon">✍️</span>
+        <span class="nav-label">연습일지</span>
+      </button>
+    </nav>
+
+  </div>
 
   <script src="app.js"></script>
 </body>

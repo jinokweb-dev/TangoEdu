@@ -1,7 +1,9 @@
-// Hong Soo & Jin Joo Argentine Tango Academy Application Script
+// Myongji University Future Education Center - Tango Master Course
+// Advising Professors: Hong Soo & Jin Joo
+// Core Logic (Mobile-First Shell + IndexedDB Video Journal Storage)
 
 // ==========================================
-// 1. DATA DEFINITIONS
+// 1. DATA DEFINITIONS (CURRICULUM & GLOSSARY)
 // ==========================================
 
 const CURRICULUM_DATA = [
@@ -15,19 +17,19 @@ const CURRICULUM_DATA = [
     week: 2,
     title: "8보 기초 조합: 살리다 바시카 (Salida Básica)",
     badge: "2주차",
-    content: "탱고의 문을 여는 대표적인 8단계 기초 동선입니다. 댄스홀의 반시계 진행방향(Ronda)을 인지하며 파트너와 흐름을 맞춰 이동하는 훈련을 합니다."
+    content: "탱고의 문을 여는 대표적인 8단계 기초 동선입니다. 론다(댄스홀 진행방향)를 인지하며 파트너와 흐름을 맞춰 이동하는 훈련을 합니다."
   },
   {
     week: 3,
     title: "방향 전환의 핵심: 오초 코르타도 (Ocho Cortado)",
     badge: "3주차",
-    content: "밀롱가(탱고 무도회) 등 협소한 장소에서 필수적인 8자 잘라내기 동작입니다. 골반의 회전과 상체의 고정을 유연하게 분리(Disociación)하는 방법을 배웁니다."
+    content: "밀롱가 등 협소한 장소에서 필수적인 8자 잘라내기 동작입니다. 골반의 회전과 상체의 고정을 유연하게 분리(Disociación)하는 방법을 배웁니다."
   },
   {
     week: 4,
     title: "부드러운 피벗: 오초 아델란테 & 아뜨라스 (Ocho)",
     badge: "4주차",
-    content: "앞으로 나아가는 전진 오초(Adelante)와 뒤로 나아가는 후진 오초(Atrás)를 배웁니다. 파트너에게 무리가 가지 않도록 올바르게 체중을 이동시키는 발디딤(Pisada)에 집중합니다."
+    content: "앞으로 나아가는 전진 오초(Adelante)와 뒤로 나아가는 후진 오초(Atrás)를 배웁니다. 올바른 체중 이동(Pisada)에 집중합니다."
   },
   {
     week: 5,
@@ -189,14 +191,14 @@ const ANALYSIS_REPORTS = {
 // 2. STATE VARIABLES
 // ==========================================
 let activeTab = "curriculum";
-let fontSizeClass = "font-md"; // font-sm, font-md, font-lg, font-xl
+let fontSizeClass = "font-md";
 let activeGlossaryCategory = "all";
 let searchKeyword = "";
 
 // Metronome state
 let metroBpm = 60;
 let metroPlaying = false;
-let metroRhythm = "tango"; // tango, milonga, vals
+let metroRhythm = "tango";
 let metroIntervalId = null;
 let metroCurrentBeat = 0;
 let audioCtx = null;
@@ -210,15 +212,111 @@ let selectedFigureForAnalysis = "caminata";
 let canvasAnimationId = null;
 
 // ==========================================
-// 3. AUDIO SYNTHESIS FOR METRONOME
+// 3. INDEXEDDB SETUP FOR PERSISTENT JOURNAL VIDEOS
+// ==========================================
+const DB_NAME = "TangoMasterDB";
+const DB_VERSION = 1;
+const STORE_NAME = "video_journals";
+let db = null;
+
+function initIndexedDB(callback) {
+  const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+  request.onupgradeneeded = (event) => {
+    const database = event.target.result;
+    if (!database.objectStoreNames.contains(STORE_NAME)) {
+      // Create store with id as primary key
+      database.createObjectStore(STORE_NAME, { keyPath: "id" });
+    }
+  };
+
+  request.onsuccess = (event) => {
+    db = event.target.result;
+    console.log("IndexedDB initialized successfully.");
+    if (callback) callback();
+  };
+
+  request.onerror = (event) => {
+    console.error("IndexedDB failed to open:", event.target.error);
+    if (callback) callback();
+  };
+}
+
+// Save journal to database
+function saveJournalToDB(entry, callback) {
+  if (!db) {
+    console.warn("Database not ready. Falling back to local variable.");
+    if (callback) callback();
+    return;
+  }
+
+  const transaction = db.transaction([STORE_NAME], "readwrite");
+  const store = transaction.objectStore(STORE_NAME);
+  const request = store.put(entry);
+
+  request.onsuccess = () => {
+    console.log("Journal entry saved to IndexedDB.");
+    if (callback) callback();
+  };
+
+  request.onerror = (event) => {
+    console.error("Failed to save journal to database:", event.target.error);
+  };
+}
+
+// Fetch all journals from database
+function fetchJournalsFromDB(callback) {
+  if (!db) {
+    if (callback) callback([]);
+    return;
+  }
+
+  const transaction = db.transaction([STORE_NAME], "readonly");
+  const store = transaction.objectStore(STORE_NAME);
+  const request = store.getAll();
+
+  request.onsuccess = (event) => {
+    // Sort by date/timestamp descending
+    const results = event.target.result || [];
+    results.sort((a, b) => b.timestamp - a.timestamp);
+    if (callback) callback(results);
+  };
+
+  request.onerror = (event) => {
+    console.error("Failed to fetch journals:", event.target.error);
+    if (callback) callback([]);
+  };
+}
+
+// Delete journal entry from database
+function deleteJournalFromDB(id, callback) {
+  if (!db) {
+    if (callback) callback();
+    return;
+  }
+
+  const transaction = db.transaction([STORE_NAME], "readwrite");
+  const store = transaction.objectStore(STORE_NAME);
+  const request = store.delete(id);
+
+  request.onsuccess = () => {
+    console.log(`Deleted journal entry ${id} from database.`);
+    if (callback) callback();
+  };
+
+  request.onerror = (event) => {
+    console.error("Failed to delete journal:", event.target.error);
+  };
+}
+
+// ==========================================
+// 4. AUDIO SYNTHESIS FOR METRONOME
 // ==========================================
 function playMetronomeClick(isStrong) {
   try {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    
-    // Resume audio context if suspended (common in browsers)
     if (audioCtx.state === 'suspended') {
       audioCtx.resume();
     }
@@ -229,197 +327,17 @@ function playMetronomeClick(isStrong) {
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
 
-    // Strong beats have a higher pitch (1000Hz), normal beats lower (600Hz)
     const frequency = isStrong ? 950 : 550;
     osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
     
-    // Quick attack and decay
     gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
 
     osc.start(audioCtx.currentTime);
     osc.stop(audioCtx.currentTime + 0.08);
   } catch (e) {
-    console.warn("AudioContext error: Metronome sound could not be initialized.", e);
+    console.warn("AudioContext metronome synthesis failed.", e);
   }
-}
-
-// ==========================================
-// 4. SKELETON DRAWER (VIDEO OVERLAY CANVAS)
-// ==========================================
-function drawSimulatedSkeleton(ctx, width, height, time, figure) {
-  ctx.clearRect(0, 0, width, height);
-
-  // We will simulate 2 dancers: a Leader (left) and Follower (right) facing each other in Embrace
-  const centerX = width / 2;
-  const centerY = height / 2;
-
-  // Let's create breathing/swaying motion based on time
-  const swayX = Math.sin(time * 1.5) * 8;
-  const swayY = Math.cos(time * 0.8) * 4;
-
-  // Joint definitions relative to centers
-  const lCenterX = centerX - 60 + swayX;
-  const fCenterX = centerX + 60 + swayX;
-  
-  const neckY = centerY - 60 + swayY;
-  const hipY = centerY + 30 + swayY;
-  const kneeY = centerY + 100 + swayY;
-  const ankleY = centerY + 160 + swayY;
-
-  // Draw Embrace area (Connection glow)
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(centerX + swayX, neckY + 30, 70, 0, Math.PI * 2);
-  ctx.fillStyle = "rgba(214, 175, 55, 0.04)";
-  ctx.strokeStyle = "rgba(214, 175, 55, 0.15)";
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  ctx.fill();
-  ctx.restore();
-
-  // Figure specific modifications to coordinate paths
-  let lKneeOffsetX = 0;
-  let lAnkleOffsetX = 0;
-  let fKneeOffsetX = 0;
-  let fAnkleOffsetX = 0;
-
-  if (figure === 'caminata') {
-    // Walking motion: leg swinging forward and backward
-    const walkSwing = Math.sin(time * 3);
-    lKneeOffsetX = walkSwing * 15;
-    lAnkleOffsetX = walkSwing * 30;
-    fKneeOffsetX = -walkSwing * 15;
-    fAnkleOffsetX = -walkSwing * 30;
-  } else if (figure === 'giro') {
-    // Rotating motion
-    const rotX = Math.cos(time * 2) * 15;
-    fKneeOffsetX = rotX;
-    fAnkleOffsetX = rotX * 1.8;
-  } else if (figure === 'ocho_cortado') {
-    // Quick forward/backward rebound
-    const rebound = Math.abs(Math.sin(time * 4)) * 20;
-    fAnkleOffsetX = -rebound;
-  }
-
-  // Draw Leader (Neon Red/Amber)
-  drawSkeletonPerson(ctx, lCenterX, neckY, hipY, kneeY, ankleY, lKneeOffsetX, lAnkleOffsetX, "#E74C3C", true);
-
-  // Draw Follower (Neon Cyan/Blue)
-  drawSkeletonPerson(ctx, fCenterX, neckY, hipY, kneeY, ankleY, fKneeOffsetX, fAnkleOffsetX, "#3498DB", false);
-
-  // Draw common axis of balance (Gold vertical line)
-  ctx.save();
-  ctx.beginPath();
-  ctx.setLineDash([6, 4]);
-  ctx.moveTo(centerX + swayX, centerY - 100);
-  ctx.lineTo(centerX + swayX, centerY + 200);
-  ctx.strokeStyle = "#D4AF37";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-  
-  // Balance indicator circle
-  ctx.beginPath();
-  ctx.arc(centerX + swayX, centerY + 30, 8, 0, Math.PI * 2);
-  ctx.fillStyle = "#D4AF37";
-  ctx.fill();
-  ctx.restore();
-
-  // Draw joint text labels for educational purposes (Large font compatible)
-  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-  ctx.font = "bold 12px Outfit, sans-serif";
-  ctx.fillText("중심 축 (Eje)", centerX + swayX - 35, centerY - 110);
-  ctx.fillText("아브라소 프레임", centerX + swayX - 45, centerY - 10);
-}
-
-function drawSkeletonPerson(ctx, cx, neckY, hipY, kneeY, ankleY, kneeOff, ankleOff, color, isLeader) {
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.fillStyle = color;
-  ctx.lineWidth = 3;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-
-  // Head
-  ctx.beginPath();
-  ctx.arc(cx, neckY - 25, 12, 0, Math.PI * 2);
-  ctx.stroke();
-
-  // Spine (Neck to Hip)
-  ctx.beginPath();
-  ctx.moveTo(cx, neckY);
-  ctx.lineTo(cx, hipY);
-  ctx.stroke();
-
-  // Shoulders
-  const shL = cx - 20;
-  const shR = cx + 20;
-  ctx.beginPath();
-  ctx.moveTo(shL, neckY + 5);
-  ctx.lineTo(shR, neckY + 5);
-  ctx.stroke();
-
-  // Arms (Embrace Frame)
-  ctx.beginPath();
-  if (isLeader) {
-    // Leader arm wrapping Follower
-    ctx.moveTo(shL, neckY + 5);
-    ctx.lineTo(shL - 15, neckY + 25);
-    ctx.lineTo(cx + 10, neckY + 25); // extend forward to meet partner
-  } else {
-    // Follower arm on Leader shoulder
-    ctx.moveTo(shR, neckY + 5);
-    ctx.lineTo(shR + 15, neckY + 20);
-    ctx.lineTo(cx - 15, neckY + 20); // extend forward
-  }
-  ctx.strokeStyle = color + "CC"; // slightly transparent
-  ctx.stroke();
-
-  // Hips
-  const hipL = cx - 15;
-  const hipR = cx + 15;
-  ctx.beginPath();
-  ctx.moveTo(hipL, hipY);
-  ctx.lineTo(hipR, hipY);
-  ctx.strokeStyle = color;
-  ctx.stroke();
-
-  // Legs (L & R)
-  // Standing leg (stable)
-  ctx.beginPath();
-  ctx.moveTo(hipL, hipY);
-  ctx.lineTo(hipL, kneeY);
-  ctx.lineTo(hipL, ankleY);
-  ctx.stroke();
-
-  // Working leg (moving with offsets)
-  ctx.beginPath();
-  ctx.moveTo(hipR, hipY);
-  ctx.lineTo(hipR + kneeOff, kneeY);
-  ctx.lineTo(hipR + ankleOff, ankleY);
-  ctx.stroke();
-
-  // Draw joints as highlighted dots
-  const joints = [
-    {x: cx, y: neckY},
-    {x: cx, y: hipY},
-    {x: hipL, y: kneeY},
-    {x: hipR + kneeOff, y: kneeY},
-    {x: hipL, y: ankleY},
-    {x: hipR + ankleOff, y: ankleY}
-  ];
-
-  joints.forEach(j => {
-    ctx.beginPath();
-    ctx.arc(j.x, j.y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "#FFFFFF";
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = color;
-    ctx.fill();
-    ctx.shadowBlur = 0; // reset
-  });
-
-  ctx.restore();
 }
 
 // ==========================================
@@ -427,17 +345,20 @@ function drawSkeletonPerson(ctx, cx, neckY, hipY, kneeY, ankleY, kneeOff, ankleO
 // ==========================================
 
 document.addEventListener("DOMContentLoaded", () => {
+  initIndexedDB(() => {
+    renderJournalEntries();
+  });
   initAccessibility();
-  initTabs();
+  initMobileTabs();
   renderCurriculum();
   renderGlossary();
   initGlossaryFilters();
   initMetronome();
   initAIAnalysis();
-  initJournal();
+  initJournalForm();
 });
 
-// Font size scaling (Web accessibility for seniors)
+// Font size scaling (Accessibility for seniors)
 function initAccessibility() {
   const fontClasses = ["font-sm", "font-md", "font-lg", "font-xl"];
   const buttons = {
@@ -452,13 +373,10 @@ function initAccessibility() {
     if (!el) return;
     
     el.addEventListener("click", () => {
-      // Remove all sizing classes from body
       fontClasses.forEach(c => document.body.classList.remove(c));
-      // Add selected
       document.body.classList.add(cls);
       fontSizeClass = cls;
       
-      // Update UI button active indicator
       Object.keys(buttons).forEach(id => {
         document.getElementById(id).style.borderWidth = (id === btnId) ? "2px" : "1px";
       });
@@ -466,18 +384,20 @@ function initAccessibility() {
   });
 }
 
-// Tab Switching Routing
-function initTabs() {
-  const tabs = document.querySelectorAll(".tab-btn");
+// Mobile Bottom Navigation Tabs Handler
+function initMobileTabs() {
+  const tabs = document.querySelectorAll(".nav-tab");
+  const contentArea = document.querySelector(".content-area");
+
   tabs.forEach(tab => {
     tab.addEventListener("click", () => {
       const target = tab.dataset.tab;
       
-      // Update tabs UI
+      // Update active menu tab
       tabs.forEach(t => t.classList.remove("active"));
       tab.classList.add("active");
 
-      // Update sections UI
+      // Update section contents
       document.querySelectorAll(".tab-content").forEach(section => {
         section.classList.remove("active");
       });
@@ -485,15 +405,18 @@ function initTabs() {
       
       activeTab = target;
 
-      // Handle pause of video/metronome when switching tabs to prevent background noises
+      // Reset scroll position of inner area to top for seamless mobile feel
+      if (contentArea) {
+        contentArea.scrollTop = 0;
+      }
+
+      // Stop metronome or videos when leaving tabs to respect resource constraints
       if (target !== 'rhythm' && metroPlaying) {
-        toggleMetronome(); // stop metronome when leaving
+        toggleMetronome();
       }
       if (target !== 'analysis') {
         const vid = document.getElementById('analysis-video');
-        if (vid && !vid.paused) {
-          vid.pause();
-        }
+        if (vid && !vid.paused) vid.pause();
         if (canvasAnimationId) {
           cancelAnimationFrame(canvasAnimationId);
           canvasAnimationId = null;
@@ -529,10 +452,8 @@ function renderGlossary() {
   if (!container) return;
 
   const filtered = GLOSSARY_DATA.filter(item => {
-    // Filter by Category
     const matchesCategory = (activeGlossaryCategory === "all" || item.category === activeGlossaryCategory);
     
-    // Filter by Search Keyword
     const normalizedKo = item.ko.toLowerCase();
     const normalizedEs = item.es.toLowerCase();
     const matchesSearch = !searchKeyword || 
@@ -558,7 +479,7 @@ function renderGlossary() {
       </div>
       <p class="glossary-desc">${item.desc}</p>
       <div class="glossary-tip">
-        <strong>👑 교수진 원포인트 팁:</strong> ${item.tip}
+        <strong>👑 교수진 팁:</strong> ${item.tip}
       </div>
     </div>
   `).join("");
@@ -613,7 +534,6 @@ function initMetronome() {
       metroBpm = parseInt(e.target.value);
       bpmValue.textContent = metroBpm;
       if (metroPlaying) {
-        // Restart timer with new speed dynamically
         stopMetroTimer();
         startMetroTimer();
       }
@@ -680,7 +600,6 @@ function toggleMetronome() {
     btnPlay.style.background = "var(--crimson)";
     resetMetronomeUI();
   } else {
-    // Start Audio
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
@@ -695,7 +614,7 @@ function toggleMetronome() {
 function startMetroTimer() {
   let speedMultiplier = 1;
   if (metroRhythm === "milonga") {
-    speedMultiplier = 2; // Milonga beats are double tempo/faster feel
+    speedMultiplier = 2; // Milonga is faster syncopated beat feel
   }
   const intervalMs = (60 / (metroBpm * speedMultiplier)) * 1000;
   metroIntervalId = setInterval(tickMetronome, intervalMs);
@@ -714,11 +633,9 @@ function tickMetronome() {
   
   if (nodes.length === 0 || !dot) return;
 
-  // Highlight off old beat
   nodes.forEach(n => n.classList.remove("active"));
   dot.classList.remove("active-beat", "strong-beat");
 
-  // Determine beat index
   metroCurrentBeat = (metroCurrentBeat % nodes.length) + 1;
   const currentNode = document.querySelector(`#beat-indicators .beat-node[data-beat="${metroCurrentBeat}"]`);
   
@@ -726,10 +643,8 @@ function tickMetronome() {
     currentNode.classList.add("active");
     const isStrongBeat = currentNode.classList.contains("strong");
     
-    // Play sound click synthesis
     playMetronomeClick(isStrongBeat);
     
-    // Animate visual circle indicator
     setTimeout(() => {
       dot.classList.add(isStrongBeat ? "strong-beat" : "active-beat");
     }, 10);
@@ -760,7 +675,6 @@ function initAIAnalysis() {
 
   if (!videoInput || !uploadZone) return;
 
-  // Handle Drag & Drop
   uploadZone.addEventListener("dragover", (e) => {
     e.preventDefault();
     uploadZone.style.borderColor = "var(--gold-hover)";
@@ -779,7 +693,6 @@ function initAIAnalysis() {
     }
   });
 
-  // Handle Input select
   videoInput.addEventListener("change", (e) => {
     const files = e.target.files;
     if (files.length > 0) {
@@ -787,24 +700,20 @@ function initAIAnalysis() {
     }
   });
 
-  // Handle Start Analysis Click
   btnStart.addEventListener("click", () => {
     if (isScanning) return;
     
     selectedFigureForAnalysis = document.getElementById("figure-select").value;
     
-    // Hide old report, show scanning bar and status
     reportPanel.classList.remove("active");
     scanStatus.classList.add("active");
     scanBar.classList.add("active");
     isScanning = true;
     scanProgress = 0;
 
-    // Start video playback
     analysisVideo.currentTime = 0;
     analysisVideo.play().catch(() => {});
 
-    // Start tracking drawing loops
     startCanvasLoop();
 
     scanIntervalId = setInterval(() => {
@@ -822,7 +731,6 @@ function initAIAnalysis() {
     }, 80);
   });
 
-  // Reset analysis
   btnReset.addEventListener("click", () => {
     resetAnalysisStudio();
   });
@@ -835,13 +743,10 @@ function loadAnalysisVideo(file) {
   const analysisVideo = document.getElementById("analysis-video");
 
   currentUploadedVideo = file;
-  
-  // Create object URL for local playing
   const fileURL = URL.createObjectURL(file);
   analysisVideo.src = fileURL;
   analysisVideo.load();
 
-  // Hide upload, show player and control panel
   uploadZone.style.display = "none";
   videoWrapper.classList.add("active");
   ctrlPanel.style.display = "flex";
@@ -856,12 +761,9 @@ function startCanvasLoop() {
   
   function updateCanvasFrame() {
     if (!video.paused && !video.ended) {
-      // Adjust canvas resolution dynamically to match video display bounds
       const rect = video.getBoundingClientRect();
       canvas.width = rect.width;
       canvas.height = rect.height;
-
-      // Draw skeleton simulated overlays
       drawSimulatedSkeleton(ctx, canvas.width, canvas.height, video.currentTime, selectedFigureForAnalysis);
     }
     canvasAnimationId = requestAnimationFrame(updateCanvasFrame);
@@ -877,7 +779,6 @@ function showAnalysisReport(figure) {
   const report = ANALYSIS_REPORTS[figure] || ANALYSIS_REPORTS.caminata;
   const reportPanel = document.getElementById("report-panel");
   
-  // Set values
   document.getElementById("report-score").textContent = `종합 ${report.score}점`;
   
   document.getElementById("metric-axis-text").textContent = getRatingString(report.axisScore);
@@ -899,7 +800,6 @@ function showAnalysisReport(figure) {
   document.getElementById("feedback-improvements").textContent = report.improvements;
   document.getElementById("feedback-professor-tip").innerHTML = `"<strong>홍수 & 진주 교수의 원포인트 레슨:</strong> ${report.tip}"`;
 
-  // Display report panel
   reportPanel.classList.add("active");
   reportPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -927,7 +827,6 @@ function resetAnalysisStudio() {
   const analysisVideo = document.getElementById("analysis-video");
   const canvas = document.getElementById("analysis-canvas");
 
-  // Stop analysis loop
   if (scanIntervalId) {
     clearInterval(scanIntervalId);
     scanIntervalId = null;
@@ -938,18 +837,15 @@ function resetAnalysisStudio() {
   }
   isScanning = false;
 
-  // Clear video source
   analysisVideo.pause();
   analysisVideo.src = "";
   currentUploadedVideo = null;
 
-  // Clear canvas
   if (canvas) {
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  // UI state toggles
   uploadZone.style.display = "block";
   videoWrapper.classList.remove("active");
   ctrlPanel.style.display = "none";
@@ -959,16 +855,37 @@ function resetAnalysisStudio() {
 }
 
 // ==========================================
-// 10. MODULE: PRACTICE JOURNAL
+// 10. MODULE: PERSISTENT PRACTICE JOURNAL
 // ==========================================
-function initJournal() {
+function initJournalForm() {
   const form = document.getElementById("journal-form");
   const dateInput = document.getElementById("journal-date");
+  const fileInput = document.getElementById("journal-video-input");
+  const fileTrigger = document.getElementById("btn-journal-file-trigger");
+  const fileNameDisplay = document.getElementById("journal-file-name");
 
-  // Default to today's date
+  // Default date to today
   if (dateInput) {
     const today = new Date().toISOString().split("T")[0];
     dateInput.value = today;
+  }
+
+  // Trigger file click when custom visual button is clicked (Senior friendly)
+  if (fileTrigger && fileInput) {
+    fileTrigger.addEventListener("click", () => {
+      fileInput.click();
+    });
+  }
+
+  // Display selected file name
+  if (fileInput && fileNameDisplay) {
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files.length > 0) {
+        fileNameDisplay.textContent = `📹 선택됨: ${e.target.files[0].name}`;
+      } else {
+        fileNameDisplay.textContent = "선택된 영상 없음";
+      }
+    });
   }
 
   if (form) {
@@ -977,73 +894,115 @@ function initJournal() {
       saveJournalEntry();
     });
   }
-
-  renderJournalEntries();
 }
 
 function saveJournalEntry() {
   const dateVal = document.getElementById("journal-date").value;
   const titleVal = document.getElementById("journal-title").value;
   const notesVal = document.getElementById("journal-notes").value;
-
+  const fileInput = document.getElementById("journal-video-input");
+  
   if (!dateVal || !titleVal || !notesVal) return;
 
-  const entry = {
-    id: Date.now().toString(),
+  const btnSave = document.getElementById("btn-save-journal");
+  if (btnSave) {
+    btnSave.textContent = "💾 저장 중...";
+    btnSave.disabled = true;
+  }
+
+  const entryId = Date.now().toString();
+  const newEntry = {
+    id: entryId,
     date: dateVal,
     title: titleVal,
-    notes: notesVal
+    notes: notesVal,
+    timestamp: Date.now(),
+    videoBlob: null // default
   };
 
-  // Get current logs
-  let entries = getJournalFromStorage();
-  entries.unshift(entry); // prepend to top
+  // Check if a video file was uploaded
+  if (fileInput && fileInput.files.length > 0) {
+    newEntry.videoBlob = fileInput.files[0];
+  }
 
-  // Save and render
-  localStorage.setItem("tango_journal_entries", JSON.stringify(entries));
-  renderJournalEntries();
+  saveJournalToDB(newEntry, () => {
+    // Reset form
+    document.getElementById("journal-title").value = "";
+    document.getElementById("journal-notes").value = "";
+    if (fileInput) fileInput.value = "";
+    
+    const fileNameDisplay = document.getElementById("journal-file-name");
+    if (fileNameDisplay) fileNameDisplay.textContent = "선택된 영상 없음";
 
-  // Reset inputs (except date)
-  document.getElementById("journal-title").value = "";
-  document.getElementById("journal-notes").value = "";
-}
+    if (btnSave) {
+      btnSave.textContent = "💾 일지 기록하기";
+      btnSave.disabled = false;
+    }
 
-function getJournalFromStorage() {
-  const raw = localStorage.getItem("tango_journal_entries");
-  return raw ? JSON.parse(raw) : [];
+    // Refresh UI list
+    renderJournalEntries();
+  });
 }
 
 function deleteJournalEntry(id) {
-  let entries = getJournalFromStorage();
-  entries = entries.filter(e => e.id !== id);
-  localStorage.setItem("tango_journal_entries", JSON.stringify(entries));
-  renderJournalEntries();
+  if (confirm("연습 일지를 삭제하시겠습니까?")) {
+    deleteJournalFromDB(id, () => {
+      renderJournalEntries();
+    });
+  }
 }
 
 function renderJournalEntries() {
   const container = document.getElementById("journal-container");
   if (!container) return;
 
-  const entries = getJournalFromStorage();
+  fetchJournalsFromDB((entries) => {
+    if (entries.length === 0) {
+      container.innerHTML = `<p style="text-align: center; color: var(--text-secondary); margin-top: 15px;">등록된 일지가 없습니다. 첫 연습 영상을 업로드해 보세요!</p>`;
+      return;
+    }
 
-  if (entries.length === 0) {
-    container.innerHTML = `<p style="text-align: center; color: var(--text-secondary); margin-top: 15px;">등록된 일지가 없습니다. 첫 연습 일지를 적어 보세요!</p>`;
-    return;
-  }
+    container.innerHTML = ""; // clear
 
-  container.innerHTML = entries.map(e => `
-    <div class="journal-item">
-      <div class="journal-meta">
+    entries.forEach(e => {
+      const card = document.createElement("div");
+      card.className = "journal-item";
+
+      // Meta row
+      const metaRow = document.createElement("div");
+      metaRow.className = "journal-meta";
+      metaRow.innerHTML = `
         <strong>📅 ${e.date}</strong>
         <button class="btn-delete-journal" onclick="deleteJournalEntry('${e.id}')">삭제</button>
-      </div>
-      <div class="journal-text">
+      `;
+      card.appendChild(metaRow);
+
+      // Body texts
+      const bodyDiv = document.createElement("div");
+      bodyDiv.className = "journal-text";
+      bodyDiv.innerHTML = `
         <h4 style="color: var(--gold); margin-bottom: 5px;">📍 주제: ${e.title}</h4>
         <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">${e.notes}</p>
-      </div>
-    </div>
-  `).join("");
+      `;
+      card.appendChild(bodyDiv);
+
+      // Video playing element (Cumulative and persistent blob url)
+      if (e.videoBlob) {
+        const videoElement = document.createElement("video");
+        videoElement.className = "journal-video-player";
+        videoElement.controls = true;
+        
+        // Generate blob local URL dynamically
+        const videoURL = URL.createObjectURL(e.videoBlob);
+        videoElement.src = videoURL;
+
+        card.appendChild(videoElement);
+      }
+
+      container.appendChild(card);
+    });
+  });
 }
 
-// Make delete globally accessible for onclick in HTML template
+// Make globally accessible for template event handler
 window.deleteJournalEntry = deleteJournalEntry;
