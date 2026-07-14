@@ -216,7 +216,7 @@
       <section id="rhythm" class="tab-content">
         <div class="card">
           <h2>뮤지컬리티 & 슬로우 메트로놈</h2>
-          <p>탱고 음악의 특유의 강약 구조를 시각화하여 비트를 몸으로 익힐 수 있는 학습 도구입니다.</p>
+          <p>탱고 음악의 특유의 강약 구조를 시각화하여 비트를 몸으로 익히며 거장들의 음악적 특색을 학습하는 훈련장입니다.</p>
           
           <div class="rhythm-visualizer-container">
             <!-- Visual Metronome Wheel -->
@@ -237,22 +237,82 @@
               <div class="bpm-display"><span id="bpm-value">60</span> BPM</div>
               
               <div class="tempo-slider-container">
-                <span>🐢</span>
-                <input type="range" class="tempo-slider" id="tempo-range" min="40" max="110" value="60">
-                <span>🐇</span>
+                <span>🐢 (느림)</span>
+                <input type="range" class="tempo-slider" id="tempo-range" min="40" max="140" value="60">
+                <span>(빠름) 🐇</span>
               </div>
 
               <!-- Rhythm Type Selector -->
-              <div class="rhythm-options">
+              <div class="rhythm-options" style="margin-bottom: 12px;">
                 <button class="btn-ctrl" id="rhythm-tango" style="border-width: 2px;">Tango (4/4)</button>
                 <button class="btn-ctrl" id="rhythm-milonga">Milonga (2/4)</button>
                 <button class="btn-ctrl" id="rhythm-vals">Vals (3/4)</button>
               </div>
 
               <!-- Play/Pause Button -->
-              <button class="btn-upload" id="btn-metro-play" style="width: 100%; max-width: 200px; font-size: 1.1rem; padding: 15px 0;">
+              <button class="btn-upload" id="btn-metro-play" style="width: 100%; max-width: 200px; font-size: 1.1rem; padding: 12px 0; margin-bottom: 16px;">
                 ▶️ 비트 시작
               </button>
+            </div>
+          </div>
+
+          <!-- 3 Great Tango Masters Section -->
+          <div class="masters-lesson-section" style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+            <h3 style="color: var(--gold); margin-bottom: 5px;">💃 탱고 3대 거장 오케스트라 실전 레슨</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 15px;">거장을 터치하면 음악 스타일에 맞춰 메트로놈 리듬과 속도가 자동으로 연동되며 레슨 가이드가 표시됩니다.</p>
+            
+            <div class="masters-grid" style="display: flex; gap: 8px; margin-bottom: 15px;">
+              <button class="master-card-btn" id="btn-master-darienzo" style="flex:1; background: rgba(0,0,0,0.3); border: 1px solid var(--panel-border); border-radius: 8px; padding: 12px 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;" onclick="selectMasterOrchestra('darienzo')">
+                <div style="font-size: 1.2rem; margin-bottom: 4px;">⚡</div>
+                <div style="font-weight: bold; color: var(--text-primary); font-size: 0.85rem;">후안 다리엔소</div>
+                <div style="font-size: 0.72rem; color: var(--gold-hover); margin-top: 2px;">비트의 제왕 (Compás)</div>
+              </button>
+              
+              <button class="master-card-btn" id="btn-master-disarli" style="flex:1; background: rgba(0,0,0,0.3); border: 1px solid var(--panel-border); border-radius: 8px; padding: 12px 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;" onclick="selectMasterOrchestra('disarli')">
+                <div style="font-size: 1.2rem; margin-bottom: 4px;">🎻</div>
+                <div style="font-weight: bold; color: var(--text-primary); font-size: 0.85rem;">카를로스 디 사를리</div>
+                <div style="font-size: 0.72rem; color: var(--gold-hover); margin-top: 2px;">귀족적 카미나타</div>
+              </button>
+              
+              <button class="master-card-btn" id="btn-master-piazzolla" style="flex:1; background: rgba(0,0,0,0.3); border: 1px solid var(--panel-border); border-radius: 8px; padding: 12px 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;" onclick="selectMasterOrchestra('piazzolla')">
+                <div style="font-size: 1.2rem; margin-bottom: 4px;">🔥</div>
+                <div style="font-weight: bold; color: var(--text-primary); font-size: 0.85rem;">아스토르 피아졸라</div>
+                <div style="font-size: 0.72rem; color: var(--gold-hover); margin-top: 2px;">극적 감성 (Nuevo)</div>
+              </button>
+            </div>
+
+            <!-- Master Lesson Display Panel -->
+            <div id="master-lesson-panel" class="master-lesson-panel" style="background: rgba(0,0,0,0.4); border: 1px solid var(--gold); border-radius: 8px; padding: 15px; display: none; margin-bottom: 20px;">
+              <h4 id="master-lesson-title" style="color: var(--gold); font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                <span>👤</span> [거장 이름] 스타일 레슨
+              </h4>
+              
+              <div style="font-size: 0.88rem; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: var(--gold-hover); margin-bottom: 3px;">🎵 스타일 특징</div>
+                <div id="master-lesson-desc" style="color: var(--text-primary); line-height: 1.45;">-</div>
+              </div>
+              
+              <div style="font-size: 0.88rem; margin-bottom: 12px;">
+                <div style="font-weight: bold; color: var(--gold-hover); margin-bottom: 3px;">💃 연습 동작 및 실전 팁 (지도교수 홍수 & 진주)</div>
+                <div id="master-lesson-tip" style="color: var(--text-primary); line-height: 1.45; border-left: 2px solid var(--crimson); padding-left: 8px; font-style: italic;">-</div>
+              </div>
+
+              <!-- Audio Player integration -->
+              <div class="master-audio-player" style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px;">
+                <div style="font-size: 0.85rem; font-weight: bold; color: var(--text-primary); margin-bottom: 6px; display:flex; justify-content:space-between; align-items:center;">
+                  <span>🎼 실전 연습곡 플레이어</span>
+                  <span id="audio-track-name" style="font-size:0.75rem; color: var(--gold-hover);">선택된 곡 없음</span>
+                </div>
+                
+                <audio id="master-audio-element" controls style="width: 100%; height: 32px; background: transparent; margin-bottom: 8px;"></audio>
+                
+                <!-- Custom practice mp3 upload -->
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-top: 8px;">
+                  <span style="font-size:0.72rem; color: var(--text-secondary);">자체 준비 음원 파일로 연습하기:</span>
+                  <input type="file" id="user-music-upload" accept="audio/*" style="display:none;" onchange="handleUserMusicUpload(this)">
+                  <button class="btn-ctrl" onclick="document.getElementById('user-music-upload').click()" style="font-size:0.7rem; padding: 4px 8px;">🎵 연습용 MP3 파일 선택</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

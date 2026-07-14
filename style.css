@@ -955,6 +955,13 @@ p {
   cursor: pointer;
 }
 
+/* Master card button states */
+.master-card-btn.active {
+  border-color: var(--gold) !important;
+  background: rgba(212, 175, 55, 0.1) !important;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
 /* Footer styling */
 footer {
   text-align: center;

@@ -664,6 +664,9 @@ function initMetronome() {
       Object.keys(rhythmButtons).forEach(id => {
         document.getElementById(id).style.borderWidth = (id === btnId) ? "2px" : "1px";
       });
+      // Clear active states of master orchestras if manually overriding rhythm
+      document.querySelectorAll(".master-card-btn").forEach(btn => btn.classList.remove("active"));
+      
       metroRhythm = type;
       metroCurrentBeat = 0;
       updateRhythmIndicators();
@@ -699,6 +702,17 @@ function updateRhythmIndicators() {
       <div class="beat-node" data-beat="2">2</div>
       <div class="beat-node" data-beat="3">3</div>
     `;
+  } else if (metroRhythm === "piazzolla") {
+    container.innerHTML = `
+      <div class="beat-node strong" data-beat="1">1</div>
+      <div class="beat-node silent" data-beat="2">·</div>
+      <div class="beat-node silent" data-beat="3">·</div>
+      <div class="beat-node strong" data-beat="4">4</div>
+      <div class="beat-node silent" data-beat="5">·</div>
+      <div class="beat-node silent" data-beat="6">·</div>
+      <div class="beat-node strong" data-beat="7">7</div>
+      <div class="beat-node silent" data-beat="8">·</div>
+    `;
   }
 }
 
@@ -727,6 +741,9 @@ function startMetroTimer() {
   let speedMultiplier = 1;
   if (metroRhythm === "milonga") {
     speedMultiplier = 2;
+  } else if (metroRhythm === "piazzolla") {
+    // 3+3+2 is played on 8th subdivisions, so run 2x speed for 8-beat loop
+    speedMultiplier = 2;
   }
   const intervalMs = (60 / (metroBpm * speedMultiplier)) * 1000;
   metroIntervalId = setInterval(tickMetronome, intervalMs);
@@ -754,11 +771,16 @@ function tickMetronome() {
   if (currentNode) {
     currentNode.classList.add("active");
     const isStrongBeat = currentNode.classList.contains("strong");
+    const isSilent = currentNode.classList.contains("silent");
     
-    playMetronomeClick(isStrongBeat);
+    if (!isSilent) {
+      playMetronomeClick(isStrongBeat);
+    }
     
     setTimeout(() => {
-      dot.classList.add(isStrongBeat ? "strong-beat" : "active-beat");
+      if (!isSilent) {
+        dot.classList.add(isStrongBeat ? "strong-beat" : "active-beat");
+      }
     }, 10);
   }
 }
@@ -785,14 +807,34 @@ function playMetronomeClick(isStrong) {
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
 
-    const frequency = isStrong ? 950 : 550;
-    osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+    // Dynamic pitch and duration according to selected master orchestra
+    let frequency = isStrong ? 950 : 550;
+    let duration = 0.08;
     
+    const activeMaster = document.querySelector(".master-card-btn.active");
+    if (activeMaster) {
+      const masterId = activeMaster.id;
+      if (masterId === "btn-master-darienzo") {
+        // D'Arienzo: High-frequency sharp clicks (staccato compás)
+        frequency = isStrong ? 1200 : 750;
+        duration = 0.04;
+      } else if (masterId === "btn-master-disarli") {
+        // Di Sarli: Deep, heavy bass piano thuds (legato walking base)
+        frequency = isStrong ? 380 : 220;
+        duration = 0.16;
+      } else if (masterId === "btn-master-piazzolla") {
+        // Piazzolla: High-pitch metal/woodblock accent (3+3+2 accent compás)
+        frequency = isStrong ? 1000 : 600;
+        duration = 0.06;
+      }
+    }
+
+    osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
     gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
     osc.start(audioCtx.currentTime);
-    osc.stop(audioCtx.currentTime + 0.08);
+    osc.stop(audioCtx.currentTime + duration);
   } catch (e) {
     console.warn("AudioContext metronome synthesis failed.", e);
   }
@@ -1459,3 +1501,139 @@ function deleteMasterVideo() {
 
 window.handleMasterVideoUpload = handleMasterVideoUpload;
 window.deleteMasterVideo = deleteMasterVideo;
+
+function selectMasterOrchestra(style) {
+  const darienzoBtn = document.getElementById("btn-master-darienzo");
+  const disarliBtn = document.getElementById("btn-master-disarli");
+  const piazzollaBtn = document.getElementById("btn-master-piazzolla");
+  
+  const panel = document.getElementById("master-lesson-panel");
+  const title = document.getElementById("master-lesson-title");
+  const desc = document.getElementById("master-lesson-desc");
+  const tip = document.getElementById("master-lesson-tip");
+  
+  const audioEl = document.getElementById("master-audio-element");
+  const trackName = document.getElementById("audio-track-name");
+
+  // Remove active state from all cards
+  [darienzoBtn, disarliBtn, piazzollaBtn].forEach(btn => {
+    if (btn) btn.classList.remove("active");
+  });
+
+  // Pause metronome if playing
+  if (metroPlaying) {
+    toggleMetronome();
+  }
+
+  // Stop current audio track if playing
+  if (audioEl) {
+    audioEl.pause();
+    audioEl.src = "";
+    if (trackName) trackName.textContent = "선택된 곡 없음";
+  }
+
+  if (style === 'darienzo') {
+    if (darienzoBtn) darienzoBtn.classList.add("active");
+    if (panel) panel.style.display = "block";
+    if (title) title.innerHTML = "⚡ 후안 다리엔소 (Juan D'Arienzo) 스타일 레슨";
+    if (desc) desc.textContent = "바늘로 찌르는 듯한 날카롭고 강렬한 스타카토 비트가 특징입니다. 리듬의 강박과 엇박(싱코페이션), 더블 템포(두 배 빠른 디딤)가 곡 전반을 지배하여 춤에 강한 에너지를 뿜어내게 만듭니다.";
+    if (tip) tip.textContent = "리더와 팔로워 모두 무릎을 낮추고 디딤발을 지면에 절제감 있고 강하게 툭툭 내디뎌야 합니다. 특히 다리엔소 특유의 피아노 솔로 및 질주 구간에서는 가슴 축의 중심을 안정되게 유지하며 잘게 쪼개 딛는 속주 발스텝을 밟아야 론다를 어지럽히지 않습니다. 강박 지배력을 기르기에 최고의 오케스트라입니다.";
+    
+    // Auto-setup metronome
+    metroBpm = 130;
+    metroRhythm = "tango";
+    const tempoSlider = document.getElementById("tempo-range");
+    const bpmValue = document.getElementById("bpm-value");
+    if (tempoSlider) {
+      tempoSlider.value = 130;
+      tempoSlider.max = 140;
+    }
+    if (bpmValue) bpmValue.textContent = 130;
+    
+    const tangoBtn = document.getElementById("rhythm-tango");
+    if (tangoBtn) tangoBtn.click();
+    
+    if (audioEl && trackName) {
+      audioEl.src = "https://upload.wikimedia.org/wikipedia/commons/c/c8/La_Cumparsita_%28tango%29.ogg";
+      trackName.textContent = "Juan D'Arienzo Style - La Cumparsita";
+      audioEl.load();
+    }
+  } 
+  else if (style === 'disarli') {
+    if (disarliBtn) disarliBtn.classList.add("active");
+    if (panel) panel.style.display = "block";
+    if (title) title.innerHTML = "🎻 카를로스 디 사를리 (Carlos Di Sarli) 스타일 레슨";
+    if (desc) desc.textContent = "기품 있는 피아노의 묵직한 베이스 라인과 바이올린의 우아한 레가토 선율이 매력적입니다. 격렬한 기교 대신 물이 흐르는 듯 깊고 부드러우며 밀도 있는 걷기가 음악 전체를 관통합니다.";
+    if (tip) tip.textContent = "발바닥 전체로 지면을 지긋이 쓸며 디디는 카미나타(Caminata)의 우아함을 극대화하십시오. 박자와 박자 사이의 빈 공간을 발끝의 긴장감과 가슴 텐션으로 밀도 있게 메꾸며, 멜로디의 선율에 몸을 맡겨 보행 속도의 완급을 우아하게 늘려나가는 연습에 최적입니다.";
+    
+    // Auto-setup metronome
+    metroBpm = 110;
+    metroRhythm = "tango";
+    const tempoSlider = document.getElementById("tempo-range");
+    const bpmValue = document.getElementById("bpm-value");
+    if (tempoSlider) {
+      tempoSlider.value = 110;
+      tempoSlider.max = 140;
+    }
+    if (bpmValue) bpmValue.textContent = 110;
+    
+    const tangoBtn = document.getElementById("rhythm-tango");
+    if (tangoBtn) tangoBtn.click();
+
+    if (audioEl && trackName) {
+      audioEl.src = "https://upload.wikimedia.org/wikipedia/commons/4/4c/El_Choclo_%281916%29.mp3";
+      trackName.textContent = "Carlos Di Sarli Style - El Choclo (1916)";
+      audioEl.load();
+    }
+  } 
+  else if (style === 'piazzolla') {
+    if (piazzollaBtn) piazzollaBtn.classList.add("active");
+    if (panel) panel.style.display = "block";
+    if (title) title.innerHTML = "🔥 아스토르 피아졸라 (Astor Piazzolla) 스타일 레슨";
+    if (desc) desc.textContent = "전통적인 4박자의 단조로운 흐름을 깨부수고, 3+3+2 엇박 리듬과 격정적인 반도네온의 극적 긴장감, 그리고 루바토(밀고 당기기)와 돌발적인 쉼표(정지)를 구사하는 누에보 탱고의 창시자입니다.";
+    if (tip) tip.textContent = "리듬이 쪼개지는 3+3+2 액센트 순간을 가슴 근육의 호흡 압박으로 포착하고, 반도네온이 폭발적으로 날카로워질 때 원심력을 이용해 사카다(Sacada)나 공중으로 발을 튕겨내는 보레오(Boleo) 같은 극적 장식 피구라를 연출하세요. 정지 신호가 떨어지면 상하체를 단단히 조여 중심축(Eje)을 고정한 채 파우사(Pausa)의 웅장함을 느끼십시오.";
+    
+    // Auto-setup metronome to 3+3+2
+    metroBpm = 120;
+    metroRhythm = "piazzolla";
+    const tempoSlider = document.getElementById("tempo-range");
+    const bpmValue = document.getElementById("bpm-value");
+    if (tempoSlider) {
+      tempoSlider.value = 120;
+      tempoSlider.max = 140;
+    }
+    if (bpmValue) bpmValue.textContent = 120;
+    
+    // Set other rhythm option buttons borders to regular width
+    const rhythmBtns = ["rhythm-tango", "rhythm-milonga", "rhythm-vals"];
+    rhythmBtns.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.borderWidth = "1px";
+    });
+    
+    updateRhythmIndicators();
+
+    if (audioEl && trackName) {
+      audioEl.src = ""; // Custom files recommended due to copyright
+      trackName.textContent = "Piazzolla Style Synth Loop (자체 MP3 업로드 추천)";
+    }
+  }
+}
+
+function handleUserMusicUpload(inputEl) {
+  if (inputEl.files.length === 0) return;
+  const file = inputEl.files[0];
+  const audioEl = document.getElementById("master-audio-element");
+  const trackNameEl = document.getElementById("audio-track-name");
+  
+  if (audioEl && trackNameEl) {
+    const fileURL = URL.createObjectURL(file);
+    audioEl.src = fileURL;
+    trackNameEl.textContent = `📂 자체 음원: ${file.name}`;
+    audioEl.load();
+    alert(`음원 파일 "${file.name}"이 연습 플레이어에 성공적으로 로드되었습니다.`);
+  }
+}
+
+window.selectMasterOrchestra = selectMasterOrchestra;
+window.handleUserMusicUpload = handleUserMusicUpload;
