@@ -692,6 +692,7 @@ function initMetronome() {
       }
       
       if (tapTimes.length >= 2) {
+        // Calculate average interval
         let sum = 0;
         for (let i = 1; i < tapTimes.length; i++) {
           sum += (tapTimes[i] - tapTimes[i-1]);
@@ -710,6 +711,7 @@ function initMetronome() {
         }
       }
       
+      // Reset if no tap within 2.5 seconds
       setTimeout(() => {
         if (tapTimes.length > 0 && Date.now() - tapTimes[tapTimes.length-1] >= 2500) {
           tapTimes = [];
@@ -718,6 +720,7 @@ function initMetronome() {
     });
   }
 
+  // Audio element listeners for synchronized metronome playback
   if (audioEl) {
     audioEl.addEventListener("play", () => {
       if (musicBeats.length > 0) {
@@ -831,6 +834,7 @@ function updateMusicSyncMetronome() {
 
   const currentTime = audioEl.currentTime;
 
+  // Auto-seek the correct beat index if we are out of sync or seeked
   if (currentBeatIndex < 0 || currentBeatIndex >= musicBeats.length ||
       currentTime < (currentBeatIndex > 0 ? musicBeats[currentBeatIndex - 1] : 0) ||
       (currentBeatIndex < musicBeats.length && currentTime > musicBeats[currentBeatIndex] + 0.5)) {
@@ -839,10 +843,12 @@ function updateMusicSyncMetronome() {
     currentBeatIndex = (foundIdx === -1) ? musicBeats.length : foundIdx;
   }
 
+  // Cross beat threshold
   if (currentBeatIndex < musicBeats.length && currentTime >= musicBeats[currentBeatIndex]) {
     const beatTime = musicBeats[currentBeatIndex];
     const lag = currentTime - beatTime;
 
+    // Only tick if crossing is fresh (within 150ms lag)
     if (lag < 0.15) {
       const nodes = document.querySelectorAll("#beat-indicators .beat-node");
       const dot = document.getElementById("metro-dot");
@@ -861,7 +867,7 @@ function updateMusicSyncMetronome() {
 
           if (dot) {
             dot.classList.remove("active-beat", "strong-beat");
-            void dot.offsetWidth;
+            void dot.offsetWidth; // force redraw
             dot.classList.add(isStrong ? "strong-beat" : "active-beat");
           }
         }
@@ -878,6 +884,7 @@ function toggleMetronome() {
   const audioEl = document.getElementById("rhythm-audio-element");
   if (!btnPlay) return;
 
+  // Case A: Sync play using loaded MP3
   if (musicBeats.length > 0 && audioEl) {
     if (audioEl.paused) {
       audioEl.play().catch(err => console.log("Audio play blocked by browser policies.", err));
@@ -887,6 +894,7 @@ function toggleMetronome() {
     return;
   }
 
+  // Case B: Standalone traditional metronome
   if (metroPlaying) {
     stopMetroTimer();
     btnPlay.textContent = "▶️ 메트로놈 시작";
@@ -944,6 +952,13 @@ function tickMetronome() {
   }
 }
 
+// Ensure audio context is unlocked on page click
+window.addEventListener("click", () => {
+  if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+});
+
 function resetMetronomeUI() {
   const nodes = document.querySelectorAll("#beat-indicators .beat-node");
   const dot = document.getElementById("metro-dot");
@@ -957,7 +972,7 @@ function playMetronomeClick(isStrong) {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    if (audioCtx.state === "suspended") {
+    if (audioCtx.state === 'suspended') {
       audioCtx.resume();
     }
 
@@ -1144,7 +1159,8 @@ function estimateBPMFromBeats(beats) {
   intervals.sort((a, b) => a - b);
   const medianInterval = intervals[Math.floor(intervals.length / 2)];
   return Math.round(60 / medianInterval);
-}// ==========================================
+}
+// ==========================================
 // 9. MODULE: AI SIDE-BY-SIDE VIDEO ANALYSIS
 // ==========================================
 function initAIAnalysis() {
