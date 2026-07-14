@@ -277,9 +277,10 @@ let canvasAnimationId = null;
 // 3. INDEXEDDB SETUP FOR MULTIPLE STORES
 // ==========================================
 const DB_NAME = "TangoMasterDB";
-const DB_VERSION = 2; 
+const DB_VERSION = 3; 
 const STORE_JOURNALS = "video_journals";
 const STORE_CURRICULUM = "curriculum_videos";
+const STORE_MUSIC = "rhythm_music";
 let db = null;
 
 function initIndexedDB(callback) {
@@ -295,11 +296,16 @@ function initIndexedDB(callback) {
     if (!database.objectStoreNames.contains(STORE_CURRICULUM)) {
       database.createObjectStore(STORE_CURRICULUM, { keyPath: "weekId" });
     }
+
+    if (!database.objectStoreNames.contains(STORE_MUSIC)) {
+      database.createObjectStore(STORE_MUSIC, { keyPath: "id" });
+    }
   };
 
   request.onsuccess = (event) => {
     db = event.target.result;
     console.log("IndexedDB stores successfully linked.");
+    renderRhythmMusicList();
     if (callback) callback();
   };
 
@@ -308,6 +314,7 @@ function initIndexedDB(callback) {
     if (callback) callback();
   };
 }
+
 
 // ==========================================
 // 4. PERSISTENT CURRICULUM VIDEO CONTROLS
@@ -630,7 +637,7 @@ function initGlossaryFilters() {
 }
 
 // ==========================================
-// 8. MODULE: RHYTHM METRONOME
+// 8. MODULE: RHYTHM METRONOME & PLAYLIST
 // ==========================================
 function initMetronome() {
   const tempoSlider = document.getElementById("tempo-range");
@@ -647,8 +654,21 @@ function initMetronome() {
     "rhythm-vals": "vals"
   };
 
+  const ensureAudio = () => {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+  };
+
+  // Attach audio unlock to all interactive events in this panel
+  window.addEventListener("click", ensureAudio);
+
   if (tempoSlider && bpmDisplay) {
     tempoSlider.addEventListener("input", (e) => {
+      ensureAudio();
       metroBpm = parseInt(e.target.value);
       bpmDisplay.textContent = `${metroBpm} BPM`;
       if (metroPlaying && musicBeats.length === 0) {
@@ -659,11 +679,15 @@ function initMetronome() {
   }
 
   if (btnPlay) {
-    btnPlay.addEventListener("click", toggleMetronome);
+    btnPlay.addEventListener("click", () => {
+      ensureAudio();
+      toggleMetronome();
+    });
   }
 
   if (btnSoundToggle) {
     btnSoundToggle.addEventListener("click", () => {
+      ensureAudio();
       metroSoundEnabled = !metroSoundEnabled;
       btnSoundToggle.textContent = metroSoundEnabled ? "🔊 비프 소리 켬" : "🔇 비프 소리 끔";
       btnSoundToggle.style.background = metroSoundEnabled ? "rgba(255,255,255,0.05)" : "rgba(155, 17, 30, 0.15)";
@@ -674,8 +698,9 @@ function initMetronome() {
 
   if (btnSyncPlayAll && audioEl) {
     btnSyncPlayAll.addEventListener("click", () => {
+      ensureAudio();
       if (audioEl.src === "" || audioEl.src.includes("null") || !audioEl.src) {
-        alert("먼저 오른편의 [연습용 MP3 파일 선택하기] 버튼을 통해 음원을 로드해 주세요.");
+        alert("먼저 [연습용 MP3 파일 선택하기] 버튼 또는 아래 [연습곡 목록]에서 음원을 선택해 주세요.");
         return;
       }
       toggleMetronome();
@@ -684,6 +709,7 @@ function initMetronome() {
 
   if (btnTapTempo && bpmDisplay && tempoSlider) {
     btnTapTempo.addEventListener("click", () => {
+      ensureAudio();
       const now = Date.now();
       tapTimes.push(now);
       
@@ -692,7 +718,6 @@ function initMetronome() {
       }
       
       if (tapTimes.length >= 2) {
-        // Calculate average interval
         let sum = 0;
         for (let i = 1; i < tapTimes.length; i++) {
           sum += (tapTimes[i] - tapTimes[i-1]);
@@ -711,7 +736,6 @@ function initMetronome() {
         }
       }
       
-      // Reset if no tap within 2.5 seconds
       setTimeout(() => {
         if (tapTimes.length > 0 && Date.now() - tapTimes[tapTimes.length-1] >= 2500) {
           tapTimes = [];
@@ -720,9 +744,9 @@ function initMetronome() {
     });
   }
 
-  // Audio element listeners for synchronized metronome playback
   if (audioEl) {
     audioEl.addEventListener("play", () => {
+      ensureAudio();
       if (musicBeats.length > 0) {
         metroPlaying = true;
         if (btnPlay) {
@@ -779,6 +803,7 @@ function initMetronome() {
     if (!el) return;
 
     el.addEventListener("click", () => {
+      ensureAudio();
       Object.keys(rhythmButtons).forEach(id => {
         const otherEl = document.getElementById(id);
         if (otherEl) otherEl.style.borderWidth = (id === btnId) ? "2px" : "1px";
@@ -795,6 +820,149 @@ function initMetronome() {
   });
 
   updateRhythmIndicators();
+}
+
+function saveMusicToDB(name, fileBlob, callback) {
+  if (!db) return;
+  const transaction = db.transaction(["rhythm_music"], "readwrite");
+  const store = transaction.objectStore("rhythm_music");
+  const item = {
+    id: Date.now().toString(),
+    name: name,
+    blob: fileBlob
+  };
+  const request = store.put(item);
+  request.onsuccess = () => {
+    if (callback) callback();
+  };
+}
+
+function loadMusicListFromDB(callback) {
+  if (!db) {
+    if (callback) callback([]);
+    return;
+  }
+  const transaction = db.transaction(["rhythm_music"], "readonly");
+  const store = transaction.objectStore("rhythm_music");
+  const request = store.getAll();
+  request.onsuccess = () => {
+    if (callback) callback(request.result || []);
+  };
+  request.onerror = () => {
+    if (callback) callback([]);
+  };
+}
+
+function deleteMusicFromDB(id, callback) {
+  if (!db) return;
+  const transaction = db.transaction(["rhythm_music"], "readwrite");
+  const store = transaction.objectStore("rhythm_music");
+  const request = store.delete(id);
+  request.onsuccess = () => {
+    if (callback) callback();
+  };
+}
+
+function renderRhythmMusicList() {
+  const container = document.getElementById("rhythm-music-list");
+  if (!container) return;
+
+  loadMusicListFromDB((musicList) => {
+    if (musicList.length === 0) {
+      container.innerHTML = `<div style="color: var(--text-secondary); text-align: center; padding: 10px 0;">목록에 노래가 없습니다.</div>`;
+      return;
+    }
+
+    container.innerHTML = musicList.map(item => `
+      <div class="music-item" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.15); border-radius: 6px; padding: 6px 10px; cursor: pointer; transition: all 0.2s;" onclick="selectRhythmMusic('${item.id}')">
+        <span style="flex: 1; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">🎵 ${item.name}</span>
+        <button class="btn-ctrl" onclick="deleteRhythmMusic(event, '${item.id}')" style="font-size: 0.65rem; padding: 2px 6px; background: rgba(155, 17, 30, 0.15); border-color: var(--crimson); color: #FFC0C0; margin-left: 8px;">삭제</button>
+      </div>
+    `).join("");
+  });
+}
+
+function selectRhythmMusic(id) {
+  if (!db) return;
+  const transaction = db.transaction(["rhythm_music"], "readonly");
+  const store = transaction.objectStore("rhythm_music");
+  const request = store.get(id);
+  request.onsuccess = () => {
+    const item = request.result;
+    if (item) {
+      loadRhythmMusicBlob(item.name, item.blob);
+    }
+  };
+}
+
+function deleteRhythmMusic(event, id) {
+  event.stopPropagation();
+  if (confirm("이 연습곡을 목록에서 삭제하시겠습니까?")) {
+    deleteMusicFromDB(id, () => {
+      renderRhythmMusicList();
+      alert("연습곡이 목록에서 삭제되었습니다.");
+    });
+  }
+}
+
+function loadRhythmMusicBlob(name, fileBlob) {
+  const audioEl = document.getElementById("rhythm-audio-element");
+  const filenameEl = document.getElementById("rhythm-music-filename");
+  const bpmDisplay = document.getElementById("rhythm-bpm-display");
+  const bpmStatus = document.getElementById("rhythm-bpm-status");
+  const tempoSlider = document.getElementById("tempo-range");
+
+  if (!audioEl || !filenameEl || !bpmDisplay || !bpmStatus || !tempoSlider) return;
+
+  filenameEl.textContent = `📂 ${name}`;
+  
+  const fileURL = URL.createObjectURL(fileBlob);
+  audioEl.src = fileURL;
+  audioEl.load();
+
+  bpmStatus.innerHTML = "🔍 AI 박자 정밀 분석 중 (약 3~5초 소요)...";
+  bpmDisplay.textContent = "... BPM";
+
+  if (metroPlaying && musicBeats.length === 0) {
+    toggleMetronome();
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const arrayBuffer = e.target.result;
+    
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    audioCtx.decodeAudioData(arrayBuffer, function(buffer) {
+      try {
+        const beats = extractBeatTimestamps(buffer);
+        musicBeats = beats;
+        
+        const calculatedBpm = estimateBPMFromBeats(beats);
+        metroBpm = calculatedBpm;
+        
+        bpmDisplay.textContent = `${metroBpm} BPM`;
+        tempoSlider.value = metroBpm;
+        
+        bpmStatus.innerHTML = `✅ 분석 및 동기화 완료: <strong>${metroBpm} BPM</strong> (총 ${beats.length}개 비트 연동됨)`;
+        
+        currentBeatIndex = -1;
+      } catch (err) {
+        console.error("BPM analysis error:", err);
+        bpmStatus.textContent = "⚠️ 박자 분석 실패 (기본값 120 BPM 세팅)";
+        musicBeats = [];
+        metroBpm = 120;
+        bpmDisplay.textContent = "120 BPM";
+        tempoSlider.value = 120;
+      }
+    }, function(err) {
+      console.error("Audio decode error:", err);
+      bpmStatus.textContent = "⚠️ 파일 디코딩 실패. 다른 MP3 파일로 시도해 주세요.";
+    });
+  };
+  reader.readAsArrayBuffer(fileBlob);
 }
 
 function updateRhythmIndicators() {
@@ -843,33 +1011,27 @@ function updateMusicSyncMetronome() {
     currentBeatIndex = (foundIdx === -1) ? musicBeats.length : foundIdx;
   }
 
-  // Cross beat threshold
+  // Cross beat threshold - trigger when currentTime passes the beat timestamp
   if (currentBeatIndex < musicBeats.length && currentTime >= musicBeats[currentBeatIndex]) {
-    const beatTime = musicBeats[currentBeatIndex];
-    const lag = currentTime - beatTime;
+    const nodes = document.querySelectorAll("#beat-indicators .beat-node");
+    const dot = document.getElementById("metro-dot");
 
-    // Only tick if crossing is fresh (within 150ms lag)
-    if (lag < 0.15) {
-      const nodes = document.querySelectorAll("#beat-indicators .beat-node");
-      const dot = document.getElementById("metro-dot");
+    if (nodes.length > 0) {
+      const beatNumber = (currentBeatIndex % nodes.length) + 1;
+      metroCurrentBeat = beatNumber;
 
-      if (nodes.length > 0) {
-        const beatNumber = (currentBeatIndex % nodes.length) + 1;
-        metroCurrentBeat = beatNumber;
+      nodes.forEach(n => n.classList.remove("active"));
+      const currentNode = document.querySelector(`#beat-indicators .beat-node[data-beat="${beatNumber}"]`);
+      if (currentNode) {
+        currentNode.classList.add("active");
+        const isStrong = currentNode.classList.contains("strong");
 
-        nodes.forEach(n => n.classList.remove("active"));
-        const currentNode = document.querySelector(`#beat-indicators .beat-node[data-beat="${beatNumber}"]`);
-        if (currentNode) {
-          currentNode.classList.add("active");
-          const isStrong = currentNode.classList.contains("strong");
+        playMetronomeClick(isStrong);
 
-          playMetronomeClick(isStrong);
-
-          if (dot) {
-            dot.classList.remove("active-beat", "strong-beat");
-            void dot.offsetWidth; // force redraw
-            dot.classList.add(isStrong ? "strong-beat" : "active-beat");
-          }
+        if (dot) {
+          dot.classList.remove("active-beat", "strong-beat");
+          void dot.offsetWidth; // force redraw
+          dot.classList.add(isStrong ? "strong-beat" : "active-beat");
         }
       }
     }
@@ -884,7 +1046,6 @@ function toggleMetronome() {
   const audioEl = document.getElementById("rhythm-audio-element");
   if (!btnPlay) return;
 
-  // Case A: Sync play using loaded MP3
   if (musicBeats.length > 0 && audioEl) {
     if (audioEl.paused) {
       audioEl.play().catch(err => console.log("Audio play blocked by browser policies.", err));
@@ -894,16 +1055,12 @@ function toggleMetronome() {
     return;
   }
 
-  // Case B: Standalone traditional metronome
   if (metroPlaying) {
     stopMetroTimer();
     btnPlay.textContent = "▶️ 메트로놈 시작";
     btnPlay.style.background = "var(--crimson)";
     resetMetronomeUI();
   } else {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
     metroCurrentBeat = 0;
     startMetroTimer();
     btnPlay.textContent = "⏹️ 메트로놈 정지";
@@ -952,13 +1109,6 @@ function tickMetronome() {
   }
 }
 
-// Ensure audio context is unlocked on page click
-window.addEventListener("click", () => {
-  if (audioCtx && audioCtx.state === "suspended") {
-    audioCtx.resume();
-  }
-});
-
 function resetMetronomeUI() {
   const nodes = document.querySelectorAll("#beat-indicators .beat-node");
   const dot = document.getElementById("metro-dot");
@@ -999,63 +1149,12 @@ function playMetronomeClick(isStrong) {
 function handleRhythmMusicUpload(inputEl) {
   if (inputEl.files.length === 0) return;
   const file = inputEl.files[0];
-  const audioEl = document.getElementById("rhythm-audio-element");
-  const filenameEl = document.getElementById("rhythm-music-filename");
-  const bpmDisplay = document.getElementById("rhythm-bpm-display");
-  const bpmStatus = document.getElementById("rhythm-bpm-status");
-  const tempoSlider = document.getElementById("tempo-range");
 
-  if (!audioEl || !filenameEl || !bpmDisplay || !bpmStatus || !tempoSlider) return;
+  saveMusicToDB(file.name, file, () => {
+    renderRhythmMusicList();
+  });
 
-  filenameEl.textContent = `📂 ${file.name}`;
-  
-  const fileURL = URL.createObjectURL(file);
-  audioEl.src = fileURL;
-  audioEl.load();
-
-  bpmStatus.innerHTML = "🔍 AI 박자 정밀 분석 중 (약 3~5초 소요)...";
-  bpmDisplay.textContent = "... BPM";
-
-  if (metroPlaying && musicBeats.length === 0) {
-    toggleMetronome();
-  }
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const arrayBuffer = e.target.result;
-    
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    audioCtx.decodeAudioData(arrayBuffer, function(buffer) {
-      try {
-        const beats = extractBeatTimestamps(buffer);
-        musicBeats = beats;
-        
-        const calculatedBpm = estimateBPMFromBeats(beats);
-        metroBpm = calculatedBpm;
-        
-        bpmDisplay.textContent = `${metroBpm} BPM`;
-        tempoSlider.value = metroBpm;
-        
-        bpmStatus.innerHTML = `✅ 분석 및 동기화 완료: <strong>${metroBpm} BPM</strong> (총 ${beats.length}개 비트 연동됨)`;
-        
-        currentBeatIndex = -1;
-      } catch (err) {
-        console.error("BPM analysis error:", err);
-        bpmStatus.textContent = "⚠️ 박자 분석 실패 (기본값 120 BPM 세팅)";
-        musicBeats = [];
-        metroBpm = 120;
-        bpmDisplay.textContent = "120 BPM";
-        tempoSlider.value = 120;
-      }
-    }, function(err) {
-      console.error("Audio decode error:", err);
-      bpmStatus.textContent = "⚠️ 파일 디코딩 실패. 다른 MP3 파일로 시도해 주세요.";
-    });
-  };
-  reader.readAsArrayBuffer(file);
+  loadRhythmMusicBlob(file.name, file);
 }
 
 function extractBeatTimestamps(buffer) {
