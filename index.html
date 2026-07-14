@@ -216,46 +216,94 @@
       <!-- Tab 4: Rhythm/Metronome -->
       <section id="rhythm" class="tab-content">
         <div class="card">
-          <h2>뮤지컬리티 & 슬로우 메트로놈</h2>
-          <p>탱고 음악의 특유의 강약 구조를 시각화하여 비트를 몸으로 익히며 거장들의 음악적 특색을 학습하는 훈련장입니다.</p>
+          <h2>음악 연동 박자 학습실 (Rhythm Sync Studio)</h2>
+          <p>연습할 MP3 음원을 업로드하면, 자동으로 음악의 템포(BPM)를 분석하여 메트로놈 박자를 맞추고 동시에 연습할 수 있습니다.</p>
           
-          <div class="rhythm-visualizer-container">
-            <!-- Visual Metronome Wheel -->
-            <div class="visual-metronome" id="visual-metro-wheel">
-              <div class="metronome-dot" id="metro-dot"></div>
-            </div>
-
-            <!-- Beat Nodes 1-4 -->
-            <div class="beat-indicators" id="beat-indicators">
-              <div class="beat-node strong" data-beat="1">1</div>
-              <div class="beat-node" data-beat="2">2</div>
-              <div class="beat-node strong" data-beat="3">3</div>
-              <div class="beat-node" data-beat="4">4</div>
-            </div>
-
-            <div class="metro-controls">
-              <!-- BPM control -->
-              <div class="bpm-display"><span id="bpm-value">60</span> BPM</div>
+          <!-- Dual Panel Grid for Rhythm -->
+          <div style="display: flex; gap: 12px; margin-top: 15px; flex-wrap: wrap;">
+            
+            <!-- Left Panel: Metronome visualizer and play state -->
+            <div class="rhythm-left-panel" style="flex: 1; min-width: 280px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--panel-border); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+              <h3 style="color: var(--gold); margin-bottom: 12px; font-size: 0.95rem; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px; text-align: center;">⏳ 좌 - 메트로놈 비트</h3>
               
-              <div class="tempo-slider-container">
-                <span>🐢 (느림)</span>
-                <input type="range" class="tempo-slider" id="tempo-range" min="40" max="140" value="60">
-                <span>(빠름) 🐇</span>
+              <!-- Visual Metronome Wheel -->
+              <div class="visual-metronome" id="visual-metro-wheel" style="margin-bottom: 15px;">
+                <div class="metronome-dot" id="metro-dot"></div>
               </div>
 
-              <!-- Rhythm Type Selector -->
-              <div class="rhythm-options" style="margin-bottom: 12px;">
-                <button class="btn-ctrl" id="rhythm-tango" style="border-width: 2px;">Tango (4/4)</button>
-                <button class="btn-ctrl" id="rhythm-milonga">Milonga (2/4)</button>
-                <button class="btn-ctrl" id="rhythm-vals">Vals (3/4)</button>
+              <!-- Beat Nodes 1-4 -->
+              <div class="beat-indicators" id="beat-indicators" style="margin-bottom: 15px;">
+                <div class="beat-node strong" data-beat="1">1</div>
+                <div class="beat-node" data-beat="2">2</div>
+                <div class="beat-node strong" data-beat="3">3</div>
+                <div class="beat-node" data-beat="4">4</div>
               </div>
 
-              <!-- Play/Pause Button -->
-              <button class="btn-upload" id="btn-metro-play" style="width: 100%; max-width: 200px; font-size: 1.1rem; padding: 12px 0; margin-bottom: 16px;">
-                ▶️ 비트 시작
-              </button>
+              <!-- Metronome Audio Tick Toggle -->
+              <div style="display: flex; gap: 8px; width: 100%; justify-content: center; margin-bottom: 10px;">
+                <button class="btn-ctrl" id="btn-metro-sound-toggle" style="flex: 1; font-size: 0.8rem; padding: 6px;">🔊 비프 소리 켬</button>
+                <button class="btn-upload" id="btn-metro-play" style="flex: 1.5; font-size: 0.9rem; padding: 8px 0; margin-bottom: 0;">▶️ 메트로놈 시작</button>
+              </div>
             </div>
+
+            <!-- Right Panel: MP3 Music uploader and playback -->
+            <div class="rhythm-right-panel" style="flex: 1; min-width: 280px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--panel-border); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between;">
+              <h3 style="color: var(--gold); margin-bottom: 12px; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px; text-align: center;">🎵 우 - MP3 음악 플레이어</h3>
+              
+              <!-- MP3 Upload Field -->
+              <div style="margin-bottom: 12px; text-align: center;">
+                <input type="file" id="rhythm-music-upload" accept="audio/mp3, audio/*" style="display: none;" onchange="handleRhythmMusicUpload(this)">
+                <label class="btn-upload" for="rhythm-music-upload" style="display: block; cursor: pointer; text-align: center; font-size: 0.88rem; padding: 10px;">
+                  📂 연습용 MP3 파일 선택하기
+                </label>
+                <span id="rhythm-music-filename" style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-top: 4px; word-break: break-all;">선택된 음악 파일 없음</span>
+              </div>
+
+              <!-- Audio Player -->
+              <div style="background: rgba(0, 0, 0, 0.4); border-radius: 8px; padding: 8px; margin-bottom: 12px;">
+                <audio id="rhythm-audio-element" controls style="width: 100%; height: 36px; background: transparent;"></audio>
+                
+                <!-- Play Sync (Play both audio and metronome simultaneously) -->
+                <div style="display: flex; gap: 6px; margin-top: 8px;">
+                  <button class="btn-ctrl" id="btn-sync-play-all" style="width: 100%; font-size: 0.8rem; padding: 6px; background: rgba(46, 204, 113, 0.15); border-color: #2ecc71; color: #2ecc71;">⏯️ 음악+메트로놈 동시재생</button>
+                </div>
+              </div>
+
+              <!-- BPM Analyzer Status & Control -->
+              <div style="font-size: 0.82rem; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <span style="font-weight: bold; color: var(--gold-hover);">⚡ 분석된 템포 (BPM):</span>
+                  <strong id="rhythm-bpm-display" style="font-size: 1rem; color: var(--text-primary);">60 BPM</strong>
+                </div>
+
+                <div id="rhythm-bpm-status" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">
+                  음원 파일을 업로드하면 템포 분석이 시작됩니다.
+                </div>
+
+                <!-- Tempo manual controller -->
+                <div class="tempo-slider-container" style="margin-bottom: 8px; display: flex; align-items: center; width: 100%;">
+                  <span style="font-size:0.75rem;">🐢 (느림)</span>
+                  <input type="range" class="tempo-slider" id="tempo-range" min="40" max="180" value="60" style="flex:1; margin: 0 8px;">
+                  <span style="font-size:0.75rem;">(빠름) 🐇</span>
+                </div>
+
+                <!-- Tap Tempo Manual Sync -->
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.72rem; color: var(--text-secondary);">싱크가 안 맞을 때 비트에 맞춰 탭:</span>
+                  <button class="btn-ctrl" id="btn-tap-tempo" style="font-size: 0.72rem; padding: 4px 8px; border-color: var(--gold);">🥁 박자 탭 (Tap Beat)</button>
+                </div>
+              </div>
+            </div>
+
           </div>
+
+          <!-- Rhythm Type Selector -->
+          <div class="rhythm-options" style="margin-top: 15px; display: flex; gap: 6px; justify-content: center; width: 100%;">
+            <button class="btn-ctrl" id="rhythm-tango" style="border-width: 2px; flex: 1;">Tango (4/4)</button>
+            <button class="btn-ctrl" id="rhythm-milonga" style="flex: 1;">Milonga (2/4)</button>
+            <button class="btn-ctrl" id="rhythm-vals" style="flex: 1;">Vals (3/4)</button>
+          </div>
+
         </div>
       </section>
 
