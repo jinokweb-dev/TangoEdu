@@ -651,7 +651,7 @@ function initMetronome() {
     tempoSlider.addEventListener("input", (e) => {
       metroBpm = parseInt(e.target.value);
       bpmDisplay.textContent = `${metroBpm} BPM`;
-      if (metroPlaying) {
+      if (metroPlaying && musicBeats.length === 0) {
         stopMetroTimer();
         startMetroTimer();
       }
@@ -678,22 +678,7 @@ function initMetronome() {
         alert("먼저 오른편의 [연습용 MP3 파일 선택하기] 버튼을 통해 음원을 로드해 주세요.");
         return;
       }
-
-      if (audioEl.paused) {
-        // Play audio
-        audioEl.play().catch(err => console.log("Audio play blocked by browser policies.", err));
-        // Start metronome if not playing
-        if (!metroPlaying) {
-          toggleMetronome();
-        }
-      } else {
-        // Pause audio
-        audioEl.pause();
-        // Pause metronome if playing
-        if (metroPlaying) {
-          toggleMetronome();
-        }
-      }
+      toggleMetronome();
     });
   }
 
@@ -702,13 +687,11 @@ function initMetronome() {
       const now = Date.now();
       tapTimes.push(now);
       
-      // Keep only last 4 taps
       if (tapTimes.length > 4) {
         tapTimes.shift();
       }
       
       if (tapTimes.length >= 2) {
-        // Calculate average interval
         let sum = 0;
         for (let i = 1; i < tapTimes.length; i++) {
           sum += (tapTimes[i] - tapTimes[i-1]);
@@ -720,19 +703,71 @@ function initMetronome() {
           metroBpm = calculatedBpm;
           bpmDisplay.textContent = `${metroBpm} BPM`;
           tempoSlider.value = metroBpm;
-          if (metroPlaying) {
+          if (metroPlaying && musicBeats.length === 0) {
             stopMetroTimer();
             startMetroTimer();
           }
         }
       }
       
-      // Reset if no tap within 2.5 seconds
       setTimeout(() => {
         if (tapTimes.length > 0 && Date.now() - tapTimes[tapTimes.length-1] >= 2500) {
           tapTimes = [];
         }
       }, 2500);
+    });
+  }
+
+  if (audioEl) {
+    audioEl.addEventListener("play", () => {
+      if (musicBeats.length > 0) {
+        metroPlaying = true;
+        if (btnPlay) {
+          btnPlay.textContent = "⏹️ 메트로놈 정지";
+          btnPlay.style.background = "#2ecc71";
+        }
+        currentBeatIndex = -1;
+        if (syncMetroLoopId) cancelAnimationFrame(syncMetroLoopId);
+        updateMusicSyncMetronome();
+      }
+    });
+
+    audioEl.addEventListener("pause", () => {
+      if (musicBeats.length > 0) {
+        metroPlaying = false;
+        if (btnPlay) {
+          btnPlay.textContent = "▶️ 메트로놈 시작";
+          btnPlay.style.background = "var(--crimson)";
+        }
+        resetMetronomeUI();
+        if (syncMetroLoopId) {
+          cancelAnimationFrame(syncMetroLoopId);
+          syncMetroLoopId = null;
+        }
+      }
+    });
+
+    audioEl.addEventListener("ended", () => {
+      if (musicBeats.length > 0) {
+        metroPlaying = false;
+        if (btnPlay) {
+          btnPlay.textContent = "▶️ 메트로놈 시작";
+          btnPlay.style.background = "var(--crimson)";
+        }
+        resetMetronomeUI();
+        if (syncMetroLoopId) {
+          cancelAnimationFrame(syncMetroLoopId);
+          syncMetroLoopId = null;
+        }
+      }
+    });
+
+    audioEl.addEventListener("seeked", () => {
+      if (musicBeats.length > 0) {
+        const currentTime = audioEl.currentTime;
+        let foundIdx = musicBeats.findIndex(t => t >= currentTime);
+        currentBeatIndex = (foundIdx === -1) ? musicBeats.length : foundIdx;
+      }
     });
   }
 
@@ -742,15 +777,14 @@ function initMetronome() {
 
     el.addEventListener("click", () => {
       Object.keys(rhythmButtons).forEach(id => {
-        document.getElementById(id).style.borderWidth = (id === btnId) ? "2px" : "1px";
+        const otherEl = document.getElementById(id);
+        if (otherEl) otherEl.style.borderWidth = (id === btnId) ? "2px" : "1px";
       });
-      // Clear active states of master orchestras if manually overriding rhythm
-      document.querySelectorAll(".master-card-btn").forEach(btn => btn.classList.remove("active"));
       
       metroRhythm = type;
       metroCurrentBeat = 0;
       updateRhythmIndicators();
-      if (metroPlaying) {
+      if (metroPlaying && musicBeats.length === 0) {
         stopMetroTimer();
         startMetroTimer();
       }
@@ -782,23 +816,76 @@ function updateRhythmIndicators() {
       <div class="beat-node" data-beat="2">2</div>
       <div class="beat-node" data-beat="3">3</div>
     `;
-  } else if (metroRhythm === "piazzolla") {
-    container.innerHTML = `
-      <div class="beat-node strong" data-beat="1">1</div>
-      <div class="beat-node silent" data-beat="2">·</div>
-      <div class="beat-node silent" data-beat="3">·</div>
-      <div class="beat-node strong" data-beat="4">4</div>
-      <div class="beat-node silent" data-beat="5">·</div>
-      <div class="beat-node silent" data-beat="6">·</div>
-      <div class="beat-node strong" data-beat="7">7</div>
-      <div class="beat-node silent" data-beat="8">·</div>
-    `;
   }
+}
+
+function updateMusicSyncMetronome() {
+  const audioEl = document.getElementById("rhythm-audio-element");
+  if (!audioEl || audioEl.paused) {
+    if (syncMetroLoopId) {
+      cancelAnimationFrame(syncMetroLoopId);
+      syncMetroLoopId = null;
+    }
+    return;
+  }
+
+  const currentTime = audioEl.currentTime;
+
+  if (currentBeatIndex < 0 || currentBeatIndex >= musicBeats.length ||
+      currentTime < (currentBeatIndex > 0 ? musicBeats[currentBeatIndex - 1] : 0) ||
+      (currentBeatIndex < musicBeats.length && currentTime > musicBeats[currentBeatIndex] + 0.5)) {
+    
+    let foundIdx = musicBeats.findIndex(t => t >= currentTime);
+    currentBeatIndex = (foundIdx === -1) ? musicBeats.length : foundIdx;
+  }
+
+  if (currentBeatIndex < musicBeats.length && currentTime >= musicBeats[currentBeatIndex]) {
+    const beatTime = musicBeats[currentBeatIndex];
+    const lag = currentTime - beatTime;
+
+    if (lag < 0.15) {
+      const nodes = document.querySelectorAll("#beat-indicators .beat-node");
+      const dot = document.getElementById("metro-dot");
+
+      if (nodes.length > 0) {
+        const beatNumber = (currentBeatIndex % nodes.length) + 1;
+        metroCurrentBeat = beatNumber;
+
+        nodes.forEach(n => n.classList.remove("active"));
+        const currentNode = document.querySelector(`#beat-indicators .beat-node[data-beat="${beatNumber}"]`);
+        if (currentNode) {
+          currentNode.classList.add("active");
+          const isStrong = currentNode.classList.contains("strong");
+
+          playMetronomeClick(isStrong);
+
+          if (dot) {
+            dot.classList.remove("active-beat", "strong-beat");
+            void dot.offsetWidth;
+            dot.classList.add(isStrong ? "strong-beat" : "active-beat");
+          }
+        }
+      }
+    }
+    currentBeatIndex++;
+  }
+
+  syncMetroLoopId = requestAnimationFrame(updateMusicSyncMetronome);
 }
 
 function toggleMetronome() {
   const btnPlay = document.getElementById("btn-metro-play");
+  const audioEl = document.getElementById("rhythm-audio-element");
   if (!btnPlay) return;
+
+  if (musicBeats.length > 0 && audioEl) {
+    if (audioEl.paused) {
+      audioEl.play().catch(err => console.log("Audio play blocked by browser policies.", err));
+    } else {
+      audioEl.pause();
+    }
+    return;
+  }
 
   if (metroPlaying) {
     stopMetroTimer();
@@ -820,9 +907,6 @@ function toggleMetronome() {
 function startMetroTimer() {
   let speedMultiplier = 1;
   if (metroRhythm === "milonga") {
-    speedMultiplier = 2;
-  } else if (metroRhythm === "piazzolla") {
-    // 3+3+2 is played on 8th subdivisions, so run 2x speed for 8-beat loop
     speedMultiplier = 2;
   }
   const intervalMs = (60 / (metroBpm * speedMultiplier)) * 1000;
@@ -851,16 +935,11 @@ function tickMetronome() {
   if (currentNode) {
     currentNode.classList.add("active");
     const isStrongBeat = currentNode.classList.contains("strong");
-    const isSilent = currentNode.classList.contains("silent");
     
-    if (!isSilent) {
-      playMetronomeClick(isStrongBeat);
-    }
+    playMetronomeClick(isStrongBeat);
     
     setTimeout(() => {
-      if (!isSilent) {
-        dot.classList.add(isStrongBeat ? "strong-beat" : "active-beat");
-      }
+      dot.classList.add(isStrongBeat ? "strong-beat" : "active-beat");
     }, 10);
   }
 }
@@ -878,7 +957,7 @@ function playMetronomeClick(isStrong) {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    if (audioCtx.state === 'suspended') {
+    if (audioCtx.state === "suspended") {
       audioCtx.resume();
     }
 
@@ -888,7 +967,6 @@ function playMetronomeClick(isStrong) {
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
 
-    // Standard rhythm tick
     const frequency = isStrong ? 950 : 550;
     const duration = 0.08;
 
@@ -916,15 +994,17 @@ function handleRhythmMusicUpload(inputEl) {
 
   filenameEl.textContent = `📂 ${file.name}`;
   
-  // Set player source
   const fileURL = URL.createObjectURL(file);
   audioEl.src = fileURL;
   audioEl.load();
 
-  bpmStatus.innerHTML = "🔍 AI 박자 분석 진행 중 (약 3~5초 소요)...";
+  bpmStatus.innerHTML = "🔍 AI 박자 정밀 분석 중 (약 3~5초 소요)...";
   bpmDisplay.textContent = "... BPM";
 
-  // Read file into ArrayBuffer for Web Audio decoding
+  if (metroPlaying && musicBeats.length === 0) {
+    toggleMetronome();
+  }
+
   const reader = new FileReader();
   reader.onload = function(e) {
     const arrayBuffer = e.target.result;
@@ -935,20 +1015,22 @@ function handleRhythmMusicUpload(inputEl) {
 
     audioCtx.decodeAudioData(arrayBuffer, function(buffer) {
       try {
-        const detectedBpm = estimateBPM(buffer);
-        metroBpm = detectedBpm;
+        const beats = extractBeatTimestamps(buffer);
+        musicBeats = beats;
+        
+        const calculatedBpm = estimateBPMFromBeats(beats);
+        metroBpm = calculatedBpm;
+        
         bpmDisplay.textContent = `${metroBpm} BPM`;
         tempoSlider.value = metroBpm;
         
-        bpmStatus.innerHTML = `✅ 분석 완료: <strong>${metroBpm} BPM</strong>으로 박자가 동기화되었습니다.`;
+        bpmStatus.innerHTML = `✅ 분석 및 동기화 완료: <strong>${metroBpm} BPM</strong> (총 ${beats.length}개 비트 연동됨)`;
         
-        if (metroPlaying) {
-          stopMetroTimer();
-          startMetroTimer();
-        }
+        currentBeatIndex = -1;
       } catch (err) {
-        console.error("BPM detection error:", err);
-        bpmStatus.textContent = "⚠️ 박자 분석 실패 (기본값 120 BPM으로 세팅)";
+        console.error("BPM analysis error:", err);
+        bpmStatus.textContent = "⚠️ 박자 분석 실패 (기본값 120 BPM 세팅)";
+        musicBeats = [];
         metroBpm = 120;
         bpmDisplay.textContent = "120 BPM";
         tempoSlider.value = 120;
@@ -961,86 +1043,108 @@ function handleRhythmMusicUpload(inputEl) {
   reader.readAsArrayBuffer(file);
 }
 
-function estimateBPM(buffer) {
-  const data = buffer.getChannelData(0);
+function extractBeatTimestamps(buffer) {
   const sampleRate = buffer.sampleRate;
+  const rawData = buffer.getChannelData(0);
   
-  // Analyze max 30 seconds to be fast
-  const maxDuration = Math.min(30, buffer.duration);
-  const length = Math.floor(maxDuration * sampleRate);
+  const duration = Math.min(60, buffer.duration);
+  const length = Math.floor(duration * sampleRate);
   
-  // Find peak amplitude in the window to set threshold
-  let maxVal = 0;
-  for (let i = 0; i < length; i += 10) { // step by 10 to speed up
-    const val = Math.abs(data[i]);
-    if (val > maxVal) maxVal = val;
+  const alpha = 0.025;
+  const filteredData = new Float32Array(length);
+  let lastVal = 0;
+  for (let i = 0; i < length; i++) {
+    lastVal = lastVal + alpha * (rawData[i] - lastVal);
+    filteredData[i] = lastVal;
   }
   
-  const threshold = maxVal * 0.75;
-  const minInterval = sampleRate * 0.3; // Limit to max 200 BPM (0.3 seconds between peaks)
+  const frameSize = 1024;
+  const hopSize = 256;
+  const numFrames = Math.floor((length - frameSize) / hopSize);
+  const envelope = new Float32Array(numFrames);
   
+  for (let f = 0; f < numFrames; f++) {
+    const start = f * hopSize;
+    let sum = 0;
+    for (let i = 0; i < frameSize; i++) {
+      sum += filteredData[start + i] * filteredData[start + i];
+    }
+    envelope[f] = Math.sqrt(sum / frameSize);
+  }
+  
+  const odf = new Float32Array(numFrames);
+  for (let f = 1; f < numFrames; f++) {
+    const diff = envelope[f] - envelope[f-1];
+    odf[f] = diff > 0 ? diff : 0;
+  }
+  
+  let maxOdf = 0;
+  for (let f = 0; f < numFrames; f++) {
+    if (odf[f] > maxOdf) maxOdf = odf[f];
+  }
+  
+  const timeStep = hopSize / sampleRate;
   const peaks = [];
-  let lastPeakTime = 0;
+  const minIntervalFrames = Math.floor(0.35 / timeStep);
+  const localWinSize = Math.floor(0.8 / timeStep);
   
-  // Detect peaks
-  for (let i = 0; i < length; i++) {
-    const val = Math.abs(data[i]);
-    if (val > threshold) {
-      // Check if it's a local maximum and respects minInterval
-      if (i - lastPeakTime > minInterval) {
-        peaks.push(i);
-        lastPeakTime = i;
+  let f = localWinSize;
+  while (f < numFrames - localWinSize) {
+    const val = odf[f];
+    
+    let localSum = 0;
+    for (let j = -localWinSize; j <= localWinSize; j++) {
+      localSum += odf[f + j];
+    }
+    const localAvg = localSum / (localWinSize * 2 + 1);
+    
+    if (val > localAvg * 1.5 && val > maxOdf * 0.15) {
+      let isPeak = true;
+      for (let j = -5; j <= 5; j++) {
+        if (odf[f + j] > val) {
+          isPeak = false;
+          break;
+        }
+      }
+      
+      if (isPeak) {
+        const timestamp = f * timeStep;
+        peaks.push(timestamp);
+        f += minIntervalFrames;
+        continue;
       }
     }
+    f++;
   }
   
-  if (peaks.length < 2) {
-    return 120; // fallback default
-  }
-  
-  // Calculate intervals between peaks in samples
-  const intervals = [];
-  for (let i = 1; i < peaks.length; i++) {
-    intervals.push(peaks[i] - peaks[i-1]);
-  }
-  
-  // Convert intervals to BPM
-  const bpms = intervals.map(samples => Math.round((60 * sampleRate) / samples));
-  
-  // Filter BPMs to realistic range (60 to 180)
-  const validBpms = bpms.filter(bpm => bpm >= 60 && bpm <= 180);
-  
-  if (validBpms.length === 0) {
-    return 120; // fallback default
-  }
-  
-  // Group intervals to find the most common one (tempo)
-  const counts = {};
-  let maxCount = 0;
-  let modeBpm = 120;
-  
-  validBpms.forEach(bpm => {
-    // Bucket near values (e.g. within +/- 5 BPM)
-    const bucket = Math.round(bpm / 5) * 5; // group into buckets of 5 BPM
-    counts[bucket] = (counts[bucket] || 0) + 1;
-    if (counts[bucket] > maxCount) {
-      maxCount = counts[bucket];
-      modeBpm = bucket;
+  if (buffer.duration > 60 && peaks.length >= 5) {
+    const intervals = [];
+    for (let i = 1; i < peaks.length; i++) {
+      intervals.push(peaks[i] - peaks[i-1]);
     }
-  });
-  
-  // Average values inside the winning bucket
-  const modeBpmValues = validBpms.filter(bpm => Math.abs(bpm - modeBpm) <= 5);
-  const averageBpm = Math.round(modeBpmValues.reduce((a, b) => a + b, 0) / modeBpmValues.length);
-  
-  if (averageBpm >= 60 && averageBpm <= 180) {
-    return averageBpm;
+    intervals.sort((a, b) => a - b);
+    const medianInterval = intervals[Math.floor(intervals.length / 2)];
+    
+    let lastBeat = peaks[peaks.length - 1];
+    while (lastBeat + medianInterval < buffer.duration) {
+      lastBeat += medianInterval;
+      peaks.push(lastBeat);
+    }
   }
   
-  return 120;
+  return peaks;
 }
 
-// ==========================================
+function estimateBPMFromBeats(beats) {
+  if (beats.length < 2) return 120;
+  const intervals = [];
+  for (let i = 1; i < beats.length; i++) {
+    intervals.push(beats[i] - beats[i-1]);
+  }
+  intervals.sort((a, b) => a - b);
+  const medianInterval = intervals[Math.floor(intervals.length / 2)];
+  return Math.round(60 / medianInterval);
+}// ==========================================
 // 9. MODULE: AI SIDE-BY-SIDE VIDEO ANALYSIS
 // ==========================================
 function initAIAnalysis() {
