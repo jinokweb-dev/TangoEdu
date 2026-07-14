@@ -1554,8 +1554,8 @@ function selectMasterOrchestra(style) {
     if (tangoBtn) tangoBtn.click();
     
     if (audioEl && trackName) {
-      audioEl.src = "https://upload.wikimedia.org/wikipedia/commons/c/c8/La_Cumparsita_%28tango%29.ogg";
-      trackName.textContent = "Juan D'Arienzo Style - La Cumparsita";
+      audioEl.src = "https://archive.org/download/78_la-cumparsita_orquesta-tipica-argentina-mattos-y-rodrigues-eduardo-biano_gbia7026409a/78_la-cumparsita_orquesta-tipica-argentina-mattos-y-rodrigues-eduardo-biano_gbia7026409a_128kb.mp3";
+      trackName.textContent = "Juan D'Arienzo Style - La Cumparsita (MP3)";
       audioEl.load();
     }
   } 
