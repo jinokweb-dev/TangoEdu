@@ -470,7 +470,7 @@ function renderCurriculum() {
       <!-- Upload controls -->
       <div class="prof-upload-btn-container" onclick="event.stopPropagation();">
         <input type="file" id="prof-file-w${w.week}" accept="video/*" style="display:none;" onchange="handleProfVideoUpload(${w.week}, this)">
-        <button class="btn-prof-upload" onclick="document.getElementById('prof-file-w${w.week}').click()">📹 ${w.week}주차 시범 영상 변경/등록</button>
+        <label class="btn-prof-upload" for="prof-file-w${w.week}" style="display: block; text-align: center; cursor: pointer; line-height: 1.4;">📹 ${w.week}주차 시범 영상 변경/등록</label>
       </div>
     `;
     item.appendChild(details);
@@ -1141,11 +1141,8 @@ function initJournalForm() {
     dateInput.value = today;
   }
 
-  if (fileTrigger && fileInput) {
-    fileTrigger.addEventListener("click", () => {
-      fileInput.click();
-    });
-  }
+  // Native label click triggers the file selection on all browsers including Safari natively.
+  // No programmatic fileInput.click() click listener is needed to avoid double-triggering and Safari blocker.
 
   if (fileInput && fileNameDisplay) {
     fileInput.addEventListener("change", (e) => {
